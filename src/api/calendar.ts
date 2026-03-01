@@ -257,6 +257,26 @@ export const calendarApi = {
   },
 
   /**
+   * POST /api/calendar/reschedule
+   * Reschedule event to new time slot (validates permissions and conflicts server-side)
+   */
+  async rescheduleEvent(eventId: string, newStartTime: string, newEndTime?: string): Promise<CalendarEvent | null> {
+    try {
+      const res = await api.post<CalendarEvent>('/calendar/reschedule', {
+        eventId,
+        newStartTime,
+        newEndTime,
+      })
+      return res ?? null
+    } catch {
+      return this.updateEvent(eventId, {
+        start_at: newStartTime,
+        end_at: newEndTime ?? newStartTime,
+      })
+    }
+  },
+
+  /**
    * DELETE /api/calendar/events/:id
    */
   async deleteEvent(id: string): Promise<boolean> {

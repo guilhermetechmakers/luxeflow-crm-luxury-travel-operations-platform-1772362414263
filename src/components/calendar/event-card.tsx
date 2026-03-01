@@ -1,11 +1,13 @@
 /**
- * EventCard - Type-based event blocks with drag handle when allowed
+ * EventCard (EventBlock) - Type-based event blocks with drag handle when allowed
  * LuxeFlow palette: olive accent (#8A9A5B), gold (#C6AB62), warm neutrals
  * Variants: CheckIn, CheckOut, Deadline, Task, RoomBlock
+ * Accessible: keyboard focus, aria-grabbed, drag affordance
  */
 import { useCallback } from 'react'
 import { GripVertical, LogIn, LogOut, Clock, CheckSquare, Bed } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatTime } from '@/lib/calendar-utils'
 import type { CalendarEvent, CalendarEventType } from '@/types/calendar'
 
 const EVENT_STYLES: Record<
@@ -37,15 +39,6 @@ const EVENT_STYLES: Record<
     border: 'border-l-4 border-l-accent',
     icon: Bed,
   },
-}
-
-function formatTime(iso: string): string {
-  try {
-    const d = new Date(iso)
-    return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-  } catch {
-    return ''
-  }
 }
 
 export interface EventCardProps {
@@ -92,18 +85,21 @@ export function EventCard({
       className={cn(
         'group relative flex items-start gap-2 rounded-lg px-2 py-1.5 text-left transition-all duration-200',
         'hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
-        'hover:scale-[1.01] active:scale-[0.99]',
+        'hover:scale-[1.02] active:scale-[0.98]',
         style.bg,
         style.border,
         isDragging && 'opacity-50 scale-95',
         'cursor-pointer'
       )}
-      aria-label={`${event.title} at ${formatTime(event.start_at)}`}
+      aria-label={`${event.title} at ${formatTime(event.start_at)}${isDraggable ? '. Drag to reschedule.' : ''}`}
+      aria-grabbed={isDraggable && isDragging}
+      title={`${event.title} · ${formatTime(event.start_at)}${event.booking?.reference ? ` · ${event.booking.reference}` : ''}`}
     >
       {isDraggable && (
         <div
-          className="absolute left-0.5 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-70"
+          className="absolute left-0.5 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-70 transition-opacity"
           aria-hidden
+          data-drag-handle
         >
           <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
         </div>

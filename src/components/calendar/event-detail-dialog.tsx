@@ -1,5 +1,6 @@
 /**
  * EventDetailDialog - Modal event detail with quick actions
+ * LuxeFlow design: olive accent, clean cards, Booking Detail link
  */
 import {
   Dialog,
@@ -8,28 +9,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Edit3, CheckCircle, ExternalLink } from 'lucide-react'
+import { Edit3, CheckCircle, ExternalLink, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatTime, formatDateDisplay } from '@/lib/calendar-utils'
 import { BookingDetailLink } from './booking-detail-link'
 import type { CalendarEvent } from '@/types/calendar'
-
-function formatTime(iso: string): string {
-  try {
-    const d = new Date(iso)
-    return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-  } catch {
-    return ''
-  }
-}
-
-function formatDate(iso: string): string {
-  try {
-    const d = new Date(iso)
-    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
-  } catch {
-    return ''
-  }
-}
 
 export interface EventDetailDialogProps {
   event: CalendarEvent | null
@@ -38,6 +22,7 @@ export interface EventDetailDialogProps {
   onOpenBooking?: (event: CalendarEvent) => void
   onEditEvent?: (event: CalendarEvent) => void
   onMarkComplete?: (event: CalendarEvent) => void
+  onExportIcal?: (bookingIds?: string[]) => void
 }
 
 export function EventDetailDialog({
@@ -47,6 +32,7 @@ export function EventDetailDialog({
   onOpenBooking,
   onEditEvent,
   onMarkComplete,
+  onExportIcal,
 }: EventDetailDialogProps) {
   if (!event) return null
 
@@ -60,7 +46,7 @@ export function EventDetailDialog({
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {formatDate(event.start_at)} · {formatTime(event.start_at)}
+            {formatDateDisplay(event.start_at)} · {formatTime(event.start_at)}
             {event.end_at && event.end_at !== event.start_at && ` – ${formatTime(event.end_at)}`}
           </p>
           <p className="text-xs text-muted-foreground capitalize">{event.type.replace('_', ' ')}</p>
@@ -110,6 +96,20 @@ export function EventDetailDialog({
               >
                 <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
                 Open Booking
+              </Button>
+            )}
+            {hasBooking && event.booking_id && onExportIcal && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 min-w-[100px]"
+                onClick={() => {
+                  onExportIcal([event.booking_id!])
+                  onOpenChange(false)
+                }}
+              >
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Export iCal
               </Button>
             )}
             <Button

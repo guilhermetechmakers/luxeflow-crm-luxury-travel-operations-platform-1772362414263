@@ -5,6 +5,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { EventCard } from './event-card'
 import { PX_PER_HOUR, PX_PER_SLOT, SLOTS_PER_HOUR } from './time-scale-column'
+import { canRescheduleEvent } from '@/lib/calendar-utils'
 import { cn } from '@/lib/utils'
 import type { CalendarEvent } from '@/types/calendar'
 import type { DragSettings } from '@/types/calendar'
@@ -143,9 +144,7 @@ export function ResourceLane({
                 if (evDayKey !== dayKey) return null
                 const top = getSlotOffset(ev.start_at, dayStart)
                 const height = getSlotHeight(ev.start_at, ev.end_at)
-                const isDraggable =
-                  dragSettings.canReschedule &&
-                  (dragSettings.reschedulableTypes ?? []).includes(ev.type)
+                const isDraggable = canRescheduleEvent(ev, dragSettings)
                 return (
                   <div
                     key={ev.id}

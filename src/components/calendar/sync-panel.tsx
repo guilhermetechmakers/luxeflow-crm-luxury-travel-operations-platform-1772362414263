@@ -16,7 +16,8 @@ import type { SyncConfig } from '@/types/calendar'
 export interface SyncPanelProps {
   syncConfig: SyncConfig | null
   onSetupSync?: (config: { provider: 'google' | 'ical'; sync_type: 'one-way' | 'two-way' }) => void
-  onExportIcal?: (bookingId?: string) => void
+  /** Export current view or selected bookings. Pass bookingIds for selected export. */
+  onExportIcal?: (bookingIds?: string[]) => void
   isLoading?: boolean
   className?: string
 }
@@ -148,6 +149,7 @@ export function SyncPanel({
                 onExportIcal?.()
                 setOpen(false)
               }}
+              aria-label="Export calendar to iCal format"
             >
               <Download className="h-4 w-4 mr-2" />
               Export iCal (.ics)

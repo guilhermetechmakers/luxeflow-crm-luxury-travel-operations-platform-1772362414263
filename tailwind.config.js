@@ -21,6 +21,14 @@ export default {
           DEFAULT: 'rgb(var(--accent))',
           foreground: 'rgb(var(--accent-foreground))',
         },
+        muted: {
+          DEFAULT: 'rgb(var(--muted))',
+          foreground: 'rgb(var(--muted-foreground))',
+        },
+        supporting: {
+          DEFAULT: 'rgb(var(--supporting))',
+          foreground: 'rgb(var(--foreground))',
+        },
         background: 'rgb(var(--background))',
         foreground: 'rgb(var(--foreground))',
         card: {
@@ -72,12 +80,17 @@ export default {
           '0%': { transform: 'translateX(100%)' },
           '100%': { transform: 'translateX(0)' },
         },
+        'scale-in': {
+          '0%': { opacity: '0', transform: 'scale(0.98)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.3s ease-out forwards',
         'fade-in-up': 'fade-in-up 0.4s ease-out forwards',
         shimmer: 'shimmer 1.5s infinite',
         'slide-in-right': 'slide-in-right 0.3s ease-out forwards',
+        'scale-in': 'scale-in 0.2s ease-out forwards',
       },
     },
   },

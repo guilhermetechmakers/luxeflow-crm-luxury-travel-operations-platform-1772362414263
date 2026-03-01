@@ -1,5 +1,7 @@
 export { BookingDetailLink } from './booking-detail-link'
 export { EventCard } from './event-card'
+/** EventBlock - alias for EventCard (spec naming) */
+export { EventCard as EventBlock } from './event-card'
 export { EventPopover } from './event-popover'
 export { EventDetailDialog } from './event-detail-dialog'
 export { FilterBar } from './filter-bar'

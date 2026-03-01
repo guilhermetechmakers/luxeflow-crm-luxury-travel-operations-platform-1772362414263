@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from 'react'
 import { toast } from 'sonner'
+import { validateRescheduleDrop } from '@/lib/calendar-utils'
 import type { CalendarEvent, DragSettings } from '@/types/calendar'
 
 export interface DragContextValue {
@@ -54,44 +55,8 @@ export function DragContextProvider({
     (
       event: CalendarEvent,
       slot: { date: string; hour: number; minute: number }
-    ): { valid: boolean; message?: string } => {
-      if (!dragSettings.canReschedule) {
-        return { valid: false, message: 'You do not have permission to reschedule' }
-      }
-      const reschedulable = dragSettings.reschedulableTypes ?? []
-      if (!reschedulable.includes(event.type)) {
-        return { valid: false, message: `Cannot reschedule ${event.type} events` }
-      }
-      const start = new Date(event.start_at)
-      const end = new Date(event.end_at)
-      const durationMs = end.getTime() - start.getTime()
-      const newStart = new Date(`${slot.date}T${String(slot.hour).padStart(2, '0')}:${String(slot.minute).padStart(2, '0')}:00`)
-      const newEnd = new Date(newStart.getTime() + durationMs)
-      if (newStart >= newEnd) {
-        return { valid: false, message: 'Invalid time range' }
-      }
-      const otherEvents = (events ?? []).filter((e) => e.id !== event.id)
-      const conflicts = otherEvents.filter((e) => {
-        const aStart = new Date(e.start_at)
-        const aEnd = new Date(e.end_at)
-        const sameResource =
-          (event.booking_id && e.booking_id === event.booking_id) ||
-          (event.room_id && e.room_id === event.room_id) ||
-          (event.agent_id && e.agent_id === event.agent_id)
-        if (!sameResource) return false
-        const evDate = new Date(e.start_at)
-        const evDayKey = `${evDate.getFullYear()}-${String(evDate.getMonth() + 1).padStart(2, '0')}-${String(evDate.getDate()).padStart(2, '0')}`
-        if (evDayKey !== slot.date) return false
-        return newStart.getTime() < aEnd.getTime() && newEnd.getTime() > aStart.getTime()
-      })
-      if (conflicts.length > 0) {
-        return {
-          valid: false,
-          message: `Conflicts with ${conflicts[0]?.title ?? 'another event'}. Please choose a different time.`,
-        }
-      }
-      return { valid: true }
-    },
+    ): { valid: boolean; message?: string } =>
+      validateRescheduleDrop(event, slot, events ?? [], dragSettings),
     [dragSettings, events]
   )
 

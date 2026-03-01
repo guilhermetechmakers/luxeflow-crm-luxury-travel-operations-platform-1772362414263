@@ -32,6 +32,8 @@ export interface CalendarEvent {
   notes?: string | null
   created_by?: string | null
   updated_by?: string | null
+  /** Per-event override: when false, event cannot be rescheduled even if type allows */
+  can_reschedule?: boolean | null
   /** Resolved associations for display */
   booking?: { id: string; reference?: string } | null
   room?: { id: string; number?: string } | null

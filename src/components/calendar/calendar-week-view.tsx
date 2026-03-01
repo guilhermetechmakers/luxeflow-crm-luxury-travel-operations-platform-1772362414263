@@ -1,13 +1,15 @@
 /**
  * CalendarWeekView - Main week/day calendar with events, filters, drag
+ * LuxeFlow design: olive accent, clean cards, event type legend
  */
 import { useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CalendarDays, LogIn, LogOut, Clock, CheckSquare, Bed } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getDayKeys, formatDayHeader, EVENT_TYPE_LABELS } from '@/lib/calendar-utils'
 import { TimeScaleColumn } from './time-scale-column'
 import { ResourceLane } from './resource-lane'
 import { FilterBar } from './filter-bar'
@@ -22,24 +24,15 @@ import type {
   DragSettings,
 } from '@/types/calendar'
 import type { Agent, Resort } from '@/types/calendar'
+import type { CalendarEventType } from '@/types/calendar'
 
-function getDayKeys(start: string, end: string): string[] {
-  const keys: string[] = []
-  const d = new Date(start)
-  const endDate = new Date(end)
-  while (d <= endDate) {
-    keys.push(
-      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-    )
-    d.setDate(d.getDate() + 1)
-  }
-  return keys
-}
-
-function formatDayHeader(key: string): string {
-  const d = new Date(key + 'T12:00:00')
-  return d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
-}
+const EVENT_LEGEND_ITEMS: { type: CalendarEventType; icon: typeof LogIn }[] = [
+  { type: 'checkin', icon: LogIn },
+  { type: 'checkout', icon: LogOut },
+  { type: 'deadline', icon: Clock },
+  { type: 'task', icon: CheckSquare },
+  { type: 'room_block', icon: Bed },
+]
 
 export interface CalendarWeekViewProps {
   events: CalendarEvent[]
@@ -202,25 +195,56 @@ function CalendarWeekViewInner({
         onFiltersChange={onFiltersChange}
       />
 
-      <Card>
+      <Card className="shadow-card overflow-hidden">
         <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">{navLabel}</span>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-sm text-muted-foreground font-medium">{navLabel}</span>
+            <div
+              className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+              role="group"
+              aria-label="Event type legend"
+            >
+              {EVENT_LEGEND_ITEMS.map(({ type, icon: Icon }) => (
+                <span
+                  key={type}
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary/60"
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {EVENT_TYPE_LABELS[type]}
+                </span>
+              ))}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-6 space-y-4">
-              <Skeleton className="h-10 w-full" />
-              <div className="grid grid-cols-7 gap-2">
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <Skeleton key={i} className="h-32" />
-                ))}
-              </div>
-              <div className="flex gap-2">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-24 flex-1" />
-                ))}
+            <div className="p-4 sm:p-6 space-y-4 animate-pulse">
+              <div className={cn('flex', viewMode === 'day' ? 'min-w-[400px]' : 'min-w-[800px]')}>
+                <div className="shrink-0 w-14" />
+                <div className="flex-1 min-w-0">
+                  <div
+                    className={cn(
+                      'grid border-b border-border',
+                      viewMode === 'day' ? 'grid-cols-1' : 'grid-cols-7'
+                    )}
+                  >
+                    {Array.from({ length: viewMode === 'day' ? 1 : 7 }).map((_, i) => (
+                      <Skeleton key={i} className="h-10 min-w-[120px]" />
+                    ))}
+                  </div>
+                  <div className="flex flex-col">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="flex border-b border-border/50">
+                        <Skeleton className="h-10 w-14 shrink-0" />
+                        <div className="flex-1 grid grid-cols-7 gap-1 p-2">
+                          {Array.from({ length: viewMode === 'day' ? 1 : 7 }).map((_, j) => (
+                            <Skeleton key={j} className="h-16 min-w-[100px]" />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           ) : (events ?? []).length === 0 ? (
@@ -239,9 +263,11 @@ function CalendarWeekViewInner({
             </div>
           ) : (
           <div
-            className="overflow-x-auto overflow-y-auto"
+            className="overflow-x-auto overflow-y-auto -mx-1 px-1 sm:mx-0 sm:px-0"
             onDragEnd={onDragEnd}
             style={{ maxHeight: '70vh' }}
+            role="application"
+            aria-label="Calendar grid"
           >
             <div
               className={cn(
@@ -253,7 +279,7 @@ function CalendarWeekViewInner({
               <div className="flex-1 min-w-0">
                 <div
                   className={cn(
-                    'grid border-b border-border',
+                    'grid border-b border-border sticky top-0 z-10 bg-card',
                     viewMode === 'day' ? 'grid-cols-1' : 'grid-cols-7'
                   )}
                 >
@@ -301,6 +327,7 @@ function CalendarWeekViewInner({
         onOpenChange={setPopoverOpen}
         onOpenBooking={handleOpenBooking}
         onMarkComplete={onMarkComplete}
+        onExportIcal={onExportIcal}
       />
     </div>
   )
