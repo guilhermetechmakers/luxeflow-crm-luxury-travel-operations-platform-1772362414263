@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/components/auth'
 import { Landing } from '@/pages/landing'
 import { Login } from '@/pages/login'
 import { Signup } from '@/pages/signup'
+import { VerifyEmail } from '@/pages/verify-email'
 import { ForgotPassword } from '@/pages/forgot-password'
 import { Dashboard } from '@/pages/dashboard'
 import { ClientsList } from '@/pages/clients-list'
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
   { path: '/', element: <Landing /> },
   { path: '/login', element: <Login /> },
   { path: '/signup', element: <Signup /> },
+  { path: '/verify-email', element: <VerifyEmail /> },
   { path: '/forgot-password', element: <ForgotPassword /> },
   {
     path: '/dashboard',
