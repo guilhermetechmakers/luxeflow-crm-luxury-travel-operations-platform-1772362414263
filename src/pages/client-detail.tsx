@@ -1,119 +1,212 @@
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Mail, Phone } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+/**
+ * ClientDetailPage - Comprehensive 360-degree client profile
+ * Tabs: Overview, Bookings, Documents, Preferences, Communications, Billing, Notes, Travel History
+ */
+import { useState, useCallback } from 'react'
+import { useParams } from 'react-router-dom'
 import * as Tabs from '@radix-ui/react-tabs'
+import { toast } from 'sonner'
+import { useClientDetail } from '@/hooks/use-client-detail'
+import {
+  ProfileHeader,
+  QuickActionsBar,
+  TabNav,
+  OverviewPanel,
+  BookingsPanel,
+  DocumentsPanel,
+  PreferencesPanel,
+  BillingPanel,
+  NotesPanel,
+  CommunicationsPanel,
+  TravelHistoryPanel,
+  VipFlagsPanel,
+} from '@/components/client-detail'
+import { Skeleton } from '@/components/ui/skeleton'
+
+const TAB_ITEMS = [
+  { value: 'overview', label: 'Overview' },
+  { value: 'bookings', label: 'Bookings' },
+  { value: 'documents', label: 'Documents' },
+  { value: 'preferences', label: 'Preferences' },
+  { value: 'communications', label: 'Communications' },
+  { value: 'billing', label: 'Billing' },
+  { value: 'notes', label: 'Notes' },
+  { value: 'travel', label: 'Travel History' },
+  { value: 'vip', label: 'VIP Flags' },
+]
 
 export function ClientDetail() {
-  const { id } = useParams()
+  const { id } = useParams<{ id: string }>()
+  const clientId = id ?? ''
+  const [activeTab, setActiveTab] = useState('overview')
+
+  const {
+    profile,
+    documents,
+    notes,
+    communications,
+    bookings,
+    travelHistory,
+    vipFlags,
+    isProfileLoading,
+    error,
+    clientDetailApi,
+    invalidateAll,
+  } = useClientDetail(clientId)
+
+  const handleAddNote = useCallback(
+    async (
+      content: string,
+      visibility: 'private' | 'team' | 'org',
+      mentions?: string[]
+    ) => {
+      try {
+        await clientDetailApi.createNote(clientId, {
+          content,
+          visibility,
+          mentions,
+        })
+        toast.success('Note added')
+        invalidateAll()
+      } catch {
+        toast.error('Failed to add note')
+      }
+    },
+    [clientId, clientDetailApi, invalidateAll]
+  )
+
+  const handleUploadDocument = useCallback(
+    async (type: 'passport' | 'visa' | 'other', file: File) => {
+      try {
+        const fileUrl = URL.createObjectURL(file)
+        await clientDetailApi.uploadDocument(clientId, {
+          type,
+          fileUrl,
+          expiryDate: undefined,
+        })
+        toast.success('Document uploaded')
+        invalidateAll()
+      } catch {
+        toast.error('Failed to upload document')
+      }
+    },
+    [clientId, clientDetailApi, invalidateAll]
+  )
+
+  const upcomingCount = (bookings ?? []).filter(
+    (b) => b.status === 'confirmed' && b.checkOut && new Date(b.checkOut) >= new Date()
+  ).length
+
+  if (!clientId) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <p className="text-muted-foreground">Invalid client ID</p>
+      </div>
+    )
+  }
+
+  if (error && !isProfileLoading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <p className="font-medium text-destructive">Failed to load client</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'An error occurred'}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link to="/dashboard/clients">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="font-serif text-3xl font-semibold">Client Profile</h1>
-          <p className="text-muted-foreground">ID: {id}</p>
-        </div>
-      </div>
+      <ProfileHeader
+        clientId={clientId}
+        profile={profile}
+        onCall={() => toast.info('Call action')}
+        onEmail={() => window.open(`mailto:${profile?.email ?? ''}`)}
+        onMessage={() => toast.info('Message action')}
+      />
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex gap-4">
-              <div className="h-16 w-16 rounded-full bg-secondary" />
-              <div>
-                <CardTitle className="text-2xl">Sarah Mitchell</CardTitle>
-                <p className="text-muted-foreground">VIP Client</p>
-                <div className="mt-2 flex gap-4 text-sm">
-                  <span className="flex items-center gap-1">
-                    <Mail className="h-4 w-4" /> sarah@example.com
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Phone className="h-4 w-4" /> +1 555 123 4567
-                  </span>
-                </div>
-              </div>
-            </div>
-            <Button asChild>
-              <Link to={`/dashboard/bookings/new?client=${id}`}>New Booking</Link>
-            </Button>
-          </div>
-        </CardHeader>
-      </Card>
+      <QuickActionsBar
+        clientId={clientId}
+        onNewTask={() => toast.info('New task')}
+        onSendProposal={() => toast.info('Send proposal')}
+        onAddNote={() => setActiveTab('notes')}
+        canEdit
+      />
 
-      <Tabs.Root defaultValue="overview" className="space-y-4">
-        <Tabs.List className="flex gap-2 border-b border-border">
-          <Tabs.Trigger
-            value="overview"
-            className="border-b-2 border-transparent px-4 py-2 data-[state=active]:border-accent data-[state=active]:text-accent"
-          >
-            Overview
-          </Tabs.Trigger>
-          <Tabs.Trigger
-            value="bookings"
-            className="border-b-2 border-transparent px-4 py-2 data-[state=active]:border-accent data-[state=active]:text-accent"
-          >
-            Bookings
-          </Tabs.Trigger>
-          <Tabs.Trigger
-            value="documents"
-            className="border-b-2 border-transparent px-4 py-2 data-[state=active]:border-accent data-[state=active]:text-accent"
-          >
-            Documents
-          </Tabs.Trigger>
-          <Tabs.Trigger
-            value="preferences"
-            className="border-b-2 border-transparent px-4 py-2 data-[state=active]:border-accent data-[state=active]:text-accent"
-          >
-            Preferences
-          </Tabs.Trigger>
-        </Tabs.List>
-        <Tabs.Content value="overview">
-          <Card>
-            <CardHeader>
-              <CardTitle>Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Client overview and key details. Document OCR, preferences, and communication history.
-              </p>
-            </CardContent>
-          </Card>
+      <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+        <TabNav
+          tabs={TAB_ITEMS}
+          value={activeTab}
+          onValueChange={setActiveTab}
+        />
+        <Tabs.Content value="overview" className="mt-4">
+          {isProfileLoading ? (
+            <Skeleton className="h-64 w-full rounded-lg" />
+          ) : (
+            <OverviewPanel
+              profile={profile}
+              upcomingBookingsCount={upcomingCount}
+              outstandingBalance={profile?.outstandingBalance ?? 0}
+            />
+          )}
         </Tabs.Content>
-        <Tabs.Content value="bookings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Bookings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Booking history for this client.</p>
-            </CardContent>
-          </Card>
+
+        <Tabs.Content value="bookings" className="mt-4">
+          <BookingsPanel
+            clientId={clientId}
+            bookings={bookings ?? []}
+            isLoading={isProfileLoading}
+          />
         </Tabs.Content>
-        <Tabs.Content value="documents">
-          <Card>
-            <CardHeader>
-              <CardTitle>Documents</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Passports, contracts, and attachments.</p>
-            </CardContent>
-          </Card>
+
+        <Tabs.Content value="documents" className="mt-4">
+          <DocumentsPanel
+            documents={documents ?? []}
+            isLoading={isProfileLoading}
+            onUpload={handleUploadDocument}
+          />
         </Tabs.Content>
-        <Tabs.Content value="preferences">
-          <Card>
-            <CardHeader>
-              <CardTitle>Preferences</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Travel preferences and special requests.</p>
-            </CardContent>
-          </Card>
+
+        <Tabs.Content value="preferences" className="mt-4">
+          <PreferencesPanel profile={profile} />
+        </Tabs.Content>
+
+        <Tabs.Content value="communications" className="mt-4">
+          <CommunicationsPanel
+            communications={communications ?? []}
+            isLoading={isProfileLoading}
+          />
+        </Tabs.Content>
+
+        <Tabs.Content value="billing" className="mt-4">
+          <BillingPanel profile={profile} />
+        </Tabs.Content>
+
+        <Tabs.Content value="notes" className="mt-4">
+          <NotesPanel
+            notes={notes ?? []}
+            isLoading={isProfileLoading}
+            onCreateNote={handleAddNote}
+            canEdit
+          />
+        </Tabs.Content>
+
+        <Tabs.Content value="travel" className="mt-4">
+          <TravelHistoryPanel
+            travelHistory={travelHistory ?? []}
+            bookings={bookings ?? []}
+            isLoading={isProfileLoading}
+          />
+        </Tabs.Content>
+
+        <Tabs.Content value="vip" className="mt-4">
+          <VipFlagsPanel
+            vipFlags={vipFlags ?? []}
+            isLoading={isProfileLoading}
+          />
         </Tabs.Content>
       </Tabs.Root>
     </div>

@@ -147,7 +147,7 @@ export function AdminDetailsCard({
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                {strength.label} — {strength.checks.filter((c) => c.met).length}/5 requirements met
+                {strength.label} — {strength.checks?.filter((c: { met: boolean }) => c.met).length ?? 0}/5 requirements met
               </p>
             </div>
           )}

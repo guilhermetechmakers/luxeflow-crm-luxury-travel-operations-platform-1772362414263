@@ -19,7 +19,7 @@ describe('PasswordStrengthMeter', () => {
 
   it('shows strength label for strong password', () => {
     render(<PasswordStrengthMeter password="SecurePass1!" />)
-    expect(screen.getByText(/very strong/i)).toBeInTheDocument()
+    expect(screen.getByText(/strong/i)).toBeInTheDocument()
   })
 
   it('handles null/undefined password safely', () => {

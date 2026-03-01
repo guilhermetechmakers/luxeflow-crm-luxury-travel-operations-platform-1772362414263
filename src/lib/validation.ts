@@ -1,69 +1,113 @@
 /**
- * Validation utilities for LuxeFlow CRM
- * isValidEmail, isStrongPassword, isNotEmpty, comparePasswords
+ * Validation utilities for client detail, auth, and related data
+ * Centralized validators to enforce data integrity per runtime safety rules
  */
+import type { DocumentType, NoteVisibility } from '@/types/client-detail'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const MIN_PASSWORD_LENGTH = 12
 
-/**
- * Validates email format
- */
-export function isValidEmail(value: string): boolean {
+/** Validate email format */
+export function isValidEmail(value: string | null | undefined): boolean {
   if (!value || typeof value !== 'string') return false
   return EMAIL_REGEX.test(value.trim())
 }
 
-/**
- * Validates password strength: min 12 chars, uppercase, lowercase, number, special char
- */
-export function isStrongPassword(value: string): boolean {
+/** Validate phone format (min 10 chars, digits/spaces/dashes allowed) */
+export function isValidPhone(value: string | null | undefined): boolean {
   if (!value || typeof value !== 'string') return false
-  if (value.length < MIN_PASSWORD_LENGTH) return false
-  const hasUpper = /[A-Z]/.test(value)
-  const hasLower = /[a-z]/.test(value)
-  const hasNumber = /\d/.test(value)
-  const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value)
-  return hasUpper && hasLower && hasNumber && hasSpecial
+  const digits = value.replace(/\D/g, '')
+  return digits.length >= 10
 }
 
-/**
- * Returns password strength feedback for UI
- */
-export function getPasswordStrength(value: string): {
-  score: number
-  label: string
-  valid: boolean
-  checks: { label: string; met: boolean }[]
-} {
-  const checks = [
-    { label: 'At least 12 characters', met: (value?.length ?? 0) >= MIN_PASSWORD_LENGTH },
-    { label: 'One uppercase letter', met: /[A-Z]/.test(value ?? '') },
-    { label: 'One lowercase letter', met: /[a-z]/.test(value ?? '') },
-    { label: 'One number', met: /\d/.test(value ?? '') },
-    { label: 'One special character', met: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value ?? '') },
-  ]
-  const score = checks.filter((c) => c.met).length
-  const labels = ['Weak', 'Fair', 'Good', 'Strong', 'Very Strong']
-  return {
-    score,
-    label: labels[Math.min(score, 4)],
-    valid: score === 5,
-    checks,
-  }
-}
-
-/**
- * Checks if string is not empty
- */
-export function isNotEmpty(value: string): boolean {
+/** Check if string is non-empty after trim */
+export function isNotEmpty(value: string | null | undefined): boolean {
   return typeof value === 'string' && value.trim().length > 0
 }
 
-/**
- * Compares two password strings
- */
-export function comparePasswords(password: string, confirmPassword: string): boolean {
-  if (!password || !confirmPassword) return false
-  return password === confirmPassword
+/** Password strength result */
+export interface PasswordStrengthResult {
+  score: number
+  label: string
+  valid: boolean
+  checks?: Array<{ label: string; met: boolean }>
+}
+
+/** Get password strength with checks */
+export function getPasswordStrength(password: string | null | undefined): PasswordStrengthResult {
+  const p = password ?? ''
+  const checks = [
+    { label: 'At least 12 characters', met: p.length >= 12 },
+    { label: 'Uppercase letter', met: /[A-Z]/.test(p) },
+    { label: 'Lowercase letter', met: /[a-z]/.test(p) },
+    { label: 'Number', met: /\d/.test(p) },
+    { label: 'Special character', met: /[!@#$%^&*(),.?":{}|<>]/.test(p) },
+  ]
+  const score = checks.filter((c) => c.met).length
+  const label = score <= 2 ? 'Weak' : score <= 4 ? 'Fair' : 'Strong'
+  const valid = checks.every((c) => c.met)
+  return { score, label, valid, checks }
+}
+
+/** Check if password meets all strength requirements */
+export function isStrongPassword(value: string | null | undefined): boolean {
+  return getPasswordStrength(value).valid
+}
+
+/** Compare two passwords for equality (empty strings are invalid) */
+export function comparePasswords(a: string | null | undefined, b: string | null | undefined): boolean {
+  if (a == null || b == null) return false
+  if (typeof a !== 'string' || typeof b !== 'string') return false
+  if (a === '' || b === '') return false
+  return a === b
+}
+
+/** Validate date string (ISO or parseable) */
+export function isValidDate(value: string | null | undefined): boolean {
+  if (!value || typeof value !== 'string') return false
+  const d = new Date(value)
+  return !Number.isNaN(d.getTime())
+}
+
+/** Validate future date (for expiry, etc.) */
+export function isFutureDate(value: string | null | undefined): boolean {
+  if (!isValidDate(value)) return false
+  return new Date(value!).getTime() > Date.now()
+}
+
+/** Validate document type */
+export function isValidDocumentType(value: unknown): value is DocumentType {
+  return value === 'passport' || value === 'visa' || value === 'other'
+}
+
+/** Validate note visibility */
+export function isValidNoteVisibility(value: unknown): value is NoteVisibility {
+  return value === 'private' || value === 'team' || value === 'org'
+}
+
+/** Validate file for upload (size, type) */
+export interface FileValidationResult {
+  valid: boolean
+  error?: string
+}
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png']
+
+export function validateUploadFile(file: File | null | undefined): FileValidationResult {
+  if (!file || !(file instanceof File)) {
+    return { valid: false, error: 'No file selected' }
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return { valid: false, error: 'File too large (max 10MB)' }
+  }
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return { valid: false, error: 'Invalid file type. Use PDF, JPEG, or PNG' }
+  }
+  return { valid: true }
+}
+
+/** Validate array is non-empty and contains valid items */
+export function ensureArray<T>(value: unknown, guard: (v: unknown) => v is T): T[] {
+  if (!Array.isArray(value)) return []
+  return value.filter(guard)
 }

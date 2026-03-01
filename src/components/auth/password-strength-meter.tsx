@@ -48,7 +48,7 @@ export function PasswordStrengthMeter({ password, className }: PasswordStrengthM
         <span className="font-medium text-foreground">{label}</span>
       </p>
       <ul className="space-y-1 text-xs text-muted-foreground" aria-hidden>
-        {(checks ?? []).map((check, i) => (
+        {(checks ?? []).map((check: { label: string; met: boolean }, i: number) => (
           <li
             key={i}
             className={cn(

@@ -46,7 +46,7 @@ describe('getPasswordStrength', () => {
     const r = getPasswordStrength('abc')
     const checks = r.checks ?? []
     expect(Array.isArray(checks)).toBe(true)
-    expect(checks.some((c) => c.label === 'At least 12 characters')).toBe(true)
+    expect(checks.some((c: { label: string }) => c.label === 'At least 12 characters')).toBe(true)
   })
 
   it('handles empty string safely', () => {
