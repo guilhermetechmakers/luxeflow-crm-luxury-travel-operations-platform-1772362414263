@@ -73,4 +73,33 @@ export const authApi = {
     })
     return () => subscription.unsubscribe()
   },
+
+  /**
+   * Request password reset email. Supabase sends a link to the redirect URL.
+   */
+  async requestPasswordReset(email: string): Promise<void> {
+    const redirectTo = `${window.location.origin}/reset-password`
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+    if (error) throw new Error(error.message)
+  },
+
+  /**
+   * Update password (used after recovery link). Requires active recovery session.
+   */
+  async updatePassword(newPassword: string): Promise<void> {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw new Error(error.message)
+  },
+
+  /**
+   * Check if current session is from a password recovery flow.
+   * Supabase establishes session when user lands from reset link (hash).
+   * Check hash first before getSession processes it.
+   */
+  async hasRecoverySession(): Promise<boolean> {
+    const urlHash = typeof window !== 'undefined' ? window.location.hash : ''
+    if (!urlHash.includes('type=recovery')) return false
+    const { data } = await supabase.auth.getSession()
+    return !!(data?.session)
+  },
 }

@@ -1,84 +1,98 @@
+/**
+ * Forgot Password Page - LuxeFlow CRM
+ * Request password reset via email with success state and support link
+ */
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import {
+  PasswordResetRequestForm,
+  SupportLink,
+  ResetLayoutWrapper,
+} from '@/components/auth'
+import type { PasswordResetRequestFormData } from '@/components/auth/password-reset-request-form'
+import { authApi } from '@/api/auth'
 import { toast } from 'sonner'
-
-const schema = z.object({ email: z.string().email('Invalid email') })
-type FormData = z.infer<typeof schema>
+import { Mail, ArrowLeft } from 'lucide-react'
 
 export function ForgotPassword() {
   const [sent, setSent] = useState(false)
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const onSubmit = async (_data: FormData) => {
+  const onSubmit = async (data: PasswordResetRequestFormData) => {
+    setError(null)
+    setLoading(true)
     try {
-      await new Promise((r) => setTimeout(r, 600))
+      await authApi.requestPasswordReset(data.email)
       setSent(true)
-      toast.success('Check your email for reset instructions')
-    } catch {
-      toast.error('Failed to send reset email')
+      toast.success('If an account exists, we sent a reset link to your email.')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to send reset email'
+      setError(message)
+      toast.error(message)
+    } finally {
+      setLoading(false)
     }
   }
 
   if (sent) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-secondary/30 px-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Check your email</CardTitle>
-            <CardDescription>
-              We&apos;ve sent password reset instructions to your email.
+      <ResetLayoutWrapper>
+        <Card className="w-full max-w-md animate-fade-in-up shadow-card">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
+              <Mail className="h-6 w-6 text-accent" aria-hidden />
+            </div>
+            <CardTitle className="font-serif text-2xl">Check your email</CardTitle>
+            <CardDescription className="text-base">
+              If an account with that email exists, we&apos;ve sent password
+              reset instructions. If you don&apos;t see the email, check your
+              spam folder.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <Button asChild className="w-full">
-              <Link to="/login">Back to Sign In</Link>
+              <Link to="/login">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Sign In
+              </Link>
             </Button>
+            <div className="text-center">
+              <SupportLink />
+            </div>
           </CardContent>
         </Card>
-      </div>
+      </ResetLayoutWrapper>
     )
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary/30 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Forgot password?</CardTitle>
-          <CardDescription>Enter your email to receive reset instructions.</CardDescription>
+    <ResetLayoutWrapper>
+      <Card className="w-full max-w-md animate-fade-in-up shadow-card">
+        <CardHeader className="text-center">
+          <CardTitle className="font-serif text-2xl">Forgot password?</CardTitle>
+          <CardDescription>
+            Enter your email to receive a secure reset link.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@agency.com"
-                className="mt-1"
-                {...register('email')}
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
-              )}
-            </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Sending...' : 'Send Reset Link'}
-            </Button>
-            <Button asChild variant="ghost" className="w-full">
+        <CardContent className="space-y-6">
+          <PasswordResetRequestForm
+            onSubmit={onSubmit}
+            loading={loading}
+            error={error}
+          />
+
+          <div className="flex flex-col items-center gap-2 border-t border-border pt-4">
+            <SupportLink />
+            <Button asChild variant="ghost" size="sm">
               <Link to="/login">Back to Sign In</Link>
             </Button>
-          </form>
+          </div>
         </CardContent>
       </Card>
-    </div>
+    </ResetLayoutWrapper>
   )
 }

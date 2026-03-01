@@ -326,305 +326,56 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-# Login Page Development Prompt
+- Maintain premium visuals, generous whitespace, and a calm, trustworthy interface.
+- Ensure visual hierarchy supports quick user comprehension during the reset flow.
+- Keep interactions smooth with subtle hover/focus transitions and consistent button states.
 
-This prompt is designed to be consumed by an AI development tool to build a production-ready Login Page (with supporting authentication flows) within the LuxeFlow CRM context. It enforces runtime safety rules (null/undefined guards, proper array handling, and React state initialization) and aligns with the visual/style system described.
+Color Palette, Typography, and Layout
+- Follow the specified LuxeFlow color tokens and typography.
+- Cards with subtle shadows (rgba(34,34,34,0.07)), 4-8px border radius.
+- Accent actions in olive green (#8A9A5B); backgrounds in white (#FFFFFF) and neutrals (#F6F6F6, #EEEEEE).
+- High-contrast text (#222222) with secondary text in #888888.
 
-## Overview
-Create a secure, visually luxurious Login Page for LuxeFlow CRM with:
-- Email/username and password fields (validated with clear error messaging)
-- Password visibility toggle
-- SSO options (Google, Enterprise SSO placeholder)
-- Remember Me functionality
-- Links to Sign Up and Password Reset
-- Security notices (2FA guidance and authentication warnings)
-- Seamless integration with the project's User Authentication & Roles system (Admin, Agent, Ops, Finance)
-- Fully wired to the frontend routing and backend authentication endpoints (signup, login, SSO, session management, and role-based access enforcement)
-- Consistent styling with the project’s visual system (colors, typography, spacing, cards, navigation)
-
-Note: All generated code must guard against null/undefined values before calling array methods, initialize arrays with useState([]), and apply data-safe patterns per the runtime safety rules provided.
-
----
-
-## Page Description (Full Detail)
-
-What this page is:
-- The Login Page for LuxeFlow CRM, focusing on secure authentication for existing users with multiple sign-in options (email/password, Google SSO, enterprise SSO), plus user experience paths to Sign Up and Password Reset.
-
-Goals:
-- Provide a secure, accessible login experience with robust validation, error handling, and accessibility (ARIA roles, keyboard navigation).
-- Initiate a user session and load role-based access controls upon successful authentication.
-- Present a clear path to password recovery and new user onboarding.
-- Present necessary security notices (2FA readiness, risk prompts) without overwhelming the user.
-
-Connected features:
-- User Authentication & Roles: Secure login, SSO, session management, and enforcement of role-based access (Admin, Agent, Ops, Finance) after login.
-- Password Reset flow is a separate page but linkable from this login.
-- Landing Page and Dashboard are downstream experiences after auth; this login page should route accordingly based on authentication state and user role.
-
-UI elements and how they should look:
-- Email/Username input: inline validation, clear error messages, helper text.
-- Password input: toggle visibility (eye icon) with accessible label.
-- SSO buttons: Google Sign-In (primary), Enterprise SSO (secondary/outlined as placeholder).
-- Remember Me: checkbox with accessible label.
-- Forgot Password: accessible link to the Password Reset flow.
-- Sign Up: prominent link to the Sign Up page.
-- Security Notices: subtle 2FA information panel (informational only on login page; not forcing 2FA at login).
-- Visual guidance: clean card layout, ample whitespace, and consistent typography.
-
-Visual style guidance (applies exactly as described in the UI/UX guidelines section):
-- Primary colors: crisp white cards and backgrounds
-- Accent: olive green buttons
-- Neutrals and text shades as defined
-- Typography: Playfair Display or Georgia for headings; Lato/Helvetica Neue for body
-- Card design, hover states, dividers, and micro-interactions should be refined and restrained
-- Navigation: Sticky header behavior prepared, but since this is a login page, it may be a minimal header or brand area with a clean focus
-
----
-
-## Components to Build
-
-1) LoginCard (reusable form block)
-- Props: onSubmit, loading, error, initialRemember
-- Fields:
-  - emailOrUsername: string
-  - password: string
-  - rememberMe: boolean
-- State & Validation:
-  - emailOrUsername: required, email pattern if email; allow username format if not email
-  - password: required, minimum length (e.g., 8)
-  - showPassword: boolean (eye toggle)
-- UI elements:
-  - Text input for email/username with label
-  - Password input with visibility toggle
-  - Remember Me checkbox
-  - Submit button: disabled while loading
-  - Inline validation messages
-- Accessibility:
-  - aria-invalid and aria-describedby for errors
-  - keyboard accessible focus order
-
-2) SSOPanel
-- Props: onGoogleLogin, onEnterpriseSSO, loading
-- UI:
-  - Google Sign-In button (primary)
-  - Enterprise SSO button (outlined or secondary)
-  - Spacing and dividers to separate
-- Behavior:
-  - Trigger corresponding authentication methods
-  - Handle loading/disabled states
-
-3) AuthLinks
-- Props: none
-- UI:
-  - Forgot Password link
-  - Sign Up link
-- Styling: subtle text with hover underlines or accent color
-
-4) SecurityNotice
-- Small informational banner or card that communicates:
-  - 2FA readiness, recommended security practices
-  - Do not reveal sensitive data; no prompts to enter 2FA here
-- Dismissible or non-dismissible per design system
-
-5) PageLayout (Login page wrapper)
-- Contains:
-  - Brand header or minimal navigation
-  - Centered responsive container
-  - Layout adapts to mobile and desktop with balanced padding
-- Ensure no null/undefined rendering
-- Use data-safe patterns when pulling any from API (e.g., from auth state)
-
----
-
-## Implementation Requirements
-
-### Frontend
-- Routing:
-  - If user is already authenticated, redirect to /dashboard or role-appropriate default page.
-  - On successful login, navigate to a role-aware landing page.
-- State management:
-  - Local component state for form values with useState
-  - Global auth state (token, user, roles) via context or a lightweight state store (e.g., React Context or Zustand) as applicable
-- Validation:
-  - Client-side validation with real-time feedback
-  - Follow the runtime safety rules for array access when handling lists (if any) and safe defaults
-- Accessibility:
-  - All inputs labeled, keyboard-navigable, screen-reader friendly
-- API integration (mocked or real):
-  - POST /auth/login with payload { emailOrUsername, password, rememberMe }
-  - POST /auth/sso/google and /auth/sso/enterprise for SSO flows
-  - On success: store session token, user details, roles; fetch user profile with safe array handling
-- Security:
-  - Do not expose sensitive data in client
-  - CSRF protection for forms as per backend standards
-  - Use secure cookies for session storage or token in memory; no localStorage for sensitive tokens if policy requires
-- Data handling safeguards:
-  - Always guard results with: const data = response?.data ?? []
-  - If you process arrays, use (Array.isArray(data) ? data : []).map(...) to avoid runtime errors
-  - Destructure with defaults: const { token = '', user = {}, roles = [] } = response ?? {}
-
-### Backend
-- Endpoints:
-  - POST /auth/login: accepts { emailOrUsername, password, rememberMe }, returns { token, user, roles }
-  - POST /auth/logout: invalidate session
-  - POST /auth/signup: for new users (not the primary login page but related)
-  - POST /auth/sso/google: initiate Google OAuth flow
-  - POST /auth/sso/enterprise: initiate Enterprise SSO flow
-  - GET /auth/me or /users/me to fetch current user and roles after login
-- Data models:
-  - User: id, email, username, name, roles: ["Admin","Agent","Ops","Finance"], twoFactorEnabled, etc.
-  - Sessions: token, expiresAt, deviceInfo
-  - Roles and permissions: per-module access control rules
-- Security:
-  - Enforce role-based access checks in backend for protected routes
-  - Ensure tokens are signed with expiration and rotation policy
-  - Validate input strictly and return generic error messages to avoid information disclosure
-
-### Integration
-- Frontend-auth flow:
-  - Login page calls /auth/login; on success, store token and user context; redirect to /dashboard
-  - SSO flows redirect to identity provider and back; on success, same handling as login
-  - After login, resolve role-based landing
-- Data handling:
-  - Use safe defaults for all API responses
-  - Guard all array operations with Array.isArray or (data ?? []) as per runtime safety
-
----
-
-## User Experience Flow
-
-1) User lands on Login Page
-2) User enters email/username and password
-3) Client validates fields; errors shown inline if invalid
-4) User optionally toggles Remember Me
-5) User clicks Sign In
-   - If credentials valid: backend returns token, user data, roles
-   - Frontend stores session, loads user profile, navigates to role-specific dashboard
-   - If 2FA is required later, inform user appropriately (seamless next step)
-6) User can click Google Sign-In or Enterprise SSO
-   - Redirects to identity provider, then back to app with authenticated session
-7) User can click Forgot Password
-   - Redirect to Password Reset Page (handled separately)
-8) User can click Sign Up
-   - Redirect to Sign Up page
-9) On any error (invalid credentials, network issues), show clear, actionable messages
-10) All flows ensure safety: no crash if data is missing; arrays guarded; state initialized properly
-
----
-
-## Technical Specifications
-
-- Data Models
-  - User { id: string, email: string, username?: string, name?: string, roles: string[], twoFactorEnabled?: boolean }
-  - Session { token: string, userId: string, expiresAt: string, device?: string }
-  - RolePermissions: mapping of role -> allowedRoutes and permissions (example: { Admin: [...], Agent: [...] })
-- API Endpoints
-  - POST /auth/login
-  - POST /auth/logout
-  - POST /auth/signup
-  - POST /auth/sso/google
-  - POST /auth/sso/enterprise
-  - GET /auth/me
-- Security
-  - Use JWT or opaque tokens with expiration
-  - Enforce role-based access on protected routes
-  - CSRF mitigation for state-changing requests
-  - 2FA readiness messaging; backend can indicate if 2FA is configured for user
-- Validation Rules
-  - Email/Username: required; if email format, validate pattern
-  - Password: required; min length 8; enforce strong policy if needed
-  - RememberMe: boolean
-  - SSO: ensure tokens returned from providers are validated
-- Runtime Safety
-  - All API response usage uses: const list = Array.isArray(response?.data) ? response.data : []
-  - Supabase-like data handling uses: const items = data ?? []
-  - Optional chaining for nested data: user?.roles?.includes(...)
-  - useState<T[]>([]) initialization for arrays
-  - Do not call map/filter/reduce on possibly null values: (items ?? []).map(...)
-  - Destructure with defaults: const { token = '', user = {}, roles = [] } = response ?? {}
-
----
-
-## Acceptance Criteria
-
-- [ ] The Login Page renders with email/username and password fields, password visibility toggle, Remember Me, Google SSO, Enterprise SSO, Forgot Password, and Sign Up links.
-- [ ] Client-side validation provides immediate feedback for required fields and invalid formats; errors are accessible and descriptive.
-- [ ] On valid credentials, the app stores a session token, loads user context including roles, and redirects to a role-appropriate dashboard. Guards must prevent navigation if authentication fails.
-- [ ] SSO flows integrate with backend endpoints; after completion, user is logged in and redirected similarly to standard login.
-- [ ] All API responses are handled with null-safe patterns (using data ?? [] or Array.isArray checks as specified).
-- [ ] The UI adheres to the project’s visual system (colors, typography, layout, card design, hover states, spacing).
-- [ ] Security requirements satisfied: 2FA guidance shown; no leakage of sensitive data; appropriate error handling.
-- [ ] Accessibility requirements met: labels, aria attributes, keyboard navigation, focus states.
-
----
-
-## UI/UX Guidelines
-
-Apply LuxeFlow’s design system and ensure consistency with the rest of the app:
-- Color Palette
-  - Primary: #FFFFFF for backgrounds and cards
-  - Accent: #8A9A5B olive green for primary actions
-  - Neutrals: #F6F6F6, #EEEEEE as background zones
-  - Text: #222222; secondary #888888
-  - Supporting: #C6AB62
-- Typography
-  - Headings: Playfair Display or Georgia
-  - Body: Lato or Helvetica Neue
-- Card Design
-  - White cards with subtle shadow (e.g., rgba(34,34,34,0.07))
-  - 4-8px border radius
-  - Light dividers and hover lift
-- Interactive Elements
-  - Buttons: olive green, white text, medium border radius, generous padding
-  - Inputs: white with light gray borders; clear focus state using accent color
-  - Micro-interactions: subtle shadows and color shifts on hover/focus
-- Navigation
-  - Clean header area; sticky behavior if used; accessible nav
-- Visual Hierarchy
-  - Emphasize the login call-to-action; keep supportive content secondary
-- Imagery
-  - If using hero imagery on the login page, select warm-toned, luxury photography consistent with branding
-
----
-
-## Mandatory Coding Standards — Runtime Safety
-
-CRITICAL: Implement in ALL generated code
-
-1) Supabase-like or API results:
+Mandatory Coding Standards — Runtime Safety
+CRITICAL: Implement all runtime safety rules in the generated code:
+1) Supabase-like results handling:
    - const items = data ?? []
 2) Array methods safety:
-   - (Array.isArray(items) ? items.map(...) : [])
-   - Or (items ?? []).map(...)
-3) React state initialization:
-   - useState<Type[]>([]) for arrays; useState<string> or useState<boolean> with sensible defaults for primitive values
-4) API responses:
+   - (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
+3) useState defaults for arrays/objects:
+   - useState<Type[]>([])
+4) API response shapes:
    - const list = Array.isArray(response?.data) ? response.data : []
-   - Destructure with defaults: const { token = '', user = {}, roles = [] } = response ?? {}
 5) Optional chaining:
-   - Use obj?.property?.nested safely
+   - obj?.property?.nested
 6) Destructuring with defaults:
    - const { items = [], count = 0 } = response ?? {}
 
----
+Project Context Integration
+- This feature integrates with: Auth + Roles (Admin, Agent, Ops, Finance), Sign-up, Login, SSO, and session management.
+- Connected pages: Login Page with secure login and SSO options; ensure seamless navigation between Login, Sign Up, and Password Reset.
+- Ensure consistent design language and components across pages for a cohesive UX.
 
-## Deliverables
+Deliverables
+- Complete React TypeScript components for Password Reset Request, Password Reset with token, TokenStatusBanner, and supportive UI elements.
+- API service layer with typed request/response contracts, including proper error handling and null safety.
+- Tests (unit/integration) covering:
+  - Email validation and error paths.
+  - Token parsing and validation paths (valid, invalid, expired).
+  - Password strength and matching logic.
+  - Safe handling of API responses with potential null data.
+- Documentation:
+  - API contracts summary.
+  - Data model notes for PasswordResetToken and related flows.
+  - Deployment considerations for security and performance (rate limiting, token expiry windows, etc.).
 
-- Clean, modular React components (LoginCard, SSOPanel, AuthLinks, SecurityNotice) with proper type definitions (TypeScript preferred) and PropTypes if using JavaScript
-- A Login Page composed from the components above, wired to the backend authentication endpoints
-- API utility layer with safe response handling and error management
-- Comprehensive comments and documentation within code for maintainability
-- Tests (unit/integration) that cover:
-  - Form validation, error messaging
-  - Successful login flow path
-  - Handling of null/undefined API responses
-  - SSO flow invocation (mocked)
-- Visual consistency with the design guidelines and accessibility checks
+Notes for AI Development Tool
+- Leverage existing design tokens and component library if present; otherwise implement lightweight, accessible equivalents aligned to LuxeFlow style.
+- Ensure code is modular, reusable, and easy to extend (e.g., if email templates or token strategies evolve).
+- Include robust error handling and graceful fallbacks to satisfy the runtime safety requirements.
+- Provide clear comments explaining security decisions and data flow, especially around token handling and password updates.
 
----
-
-If you need this prompt adapted to a specific framework (e.g., Next.js, React with Redux, Vue, or Svelte), or you want a full code scaffold (folders, file structure, and example files), I can tailor the prompt accordingly.
+If you need, I can produce a ready-to-run code scaffold (TypeScript React) with the components, API service stubs, and example tests that adhere to the above standards.
 
 ## Implementation Notes
 

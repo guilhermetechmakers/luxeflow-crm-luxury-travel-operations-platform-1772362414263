@@ -39,3 +39,24 @@ export interface SignUpInput {
   name?: string
   orgName?: string
 }
+
+/** Request password reset - POST /auth/request-password-reset */
+export interface RequestPasswordResetInput {
+  email: string
+}
+
+/** Reset password with token - POST /auth/reset-password */
+export interface ResetPasswordInput {
+  token: string
+  password: string
+}
+
+/** API response for request-password-reset (200/202) */
+export interface RequestPasswordResetResponse {
+  message: string
+}
+
+/** API response for reset-password (200) */
+export interface ResetPasswordResponse {
+  message: string
+}

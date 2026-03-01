@@ -6,6 +6,7 @@ import { Login } from '@/pages/login'
 import { Signup } from '@/pages/signup'
 import { VerifyEmail } from '@/pages/verify-email'
 import { ForgotPassword } from '@/pages/forgot-password'
+import { ResetPassword } from '@/pages/reset-password'
 import { Dashboard } from '@/pages/dashboard'
 import { ClientsList } from '@/pages/clients-list'
 import { ClientDetail } from '@/pages/client-detail'
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
   { path: '/signup', element: <Signup /> },
   { path: '/verify-email', element: <VerifyEmail /> },
   { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/reset-password', element: <ResetPassword /> },
   {
     path: '/dashboard',
     element: (
