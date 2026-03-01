@@ -295,6 +295,7 @@ export const calendarApi = {
         provider: config.provider,
         sync_type: config.sync_type,
         enabled: true,
+        last_sync_at: new Date().toISOString(),
       }
     }
   },

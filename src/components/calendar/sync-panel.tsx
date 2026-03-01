@@ -50,12 +50,22 @@ export function SyncPanel({
           <h4 className="font-serif font-semibold">Calendar Sync</h4>
 
           {syncConfig?.enabled ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Check className="h-4 w-4 text-primary" />
-              <span>
-                {syncConfig.provider === 'google' ? 'Google Calendar' : 'iCal'} ·{' '}
-                {syncConfig.sync_type === 'one-way' ? 'One-way' : 'Two-way'} sync
-              </span>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Check className="h-4 w-4 text-primary" />
+                <span>
+                  {syncConfig.provider === 'google' ? 'Google Calendar' : 'iCal'} ·{' '}
+                  {syncConfig.sync_type === 'one-way' ? 'One-way' : 'Two-way'} sync
+                </span>
+              </div>
+              {syncConfig.last_sync_at && (
+                <p className="text-xs text-muted-foreground pl-6">
+                  Last synced: {new Date(syncConfig.last_sync_at).toLocaleString(undefined, {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  })}
+                </p>
+              )}
             </div>
           ) : (
             <div className="space-y-3">

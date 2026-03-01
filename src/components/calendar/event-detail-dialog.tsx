@@ -70,11 +70,13 @@ export function EventDetailDialog({
                 'inline-block px-2 py-0.5 rounded text-xs font-medium',
                 event.status === 'confirmed' && 'bg-primary/10 text-primary',
                 event.status === 'pending' && 'bg-amber-100 text-amber-800',
+                event.status === 'payment_due' && 'bg-amber-100 text-amber-800',
                 event.status === 'completed' && 'bg-green-100 text-green-800',
-                event.status === 'overdue' && 'bg-destructive/10 text-destructive'
+                event.status === 'overdue' && 'bg-destructive/10 text-destructive',
+                event.status === 'cancelled' && 'bg-muted text-muted-foreground'
               )}
             >
-              {event.status}
+              {event.status.replace('_', ' ')}
             </span>
           )}
 

@@ -79,6 +79,17 @@ export function useUpdateCalendarEvent() {
   })
 }
 
+export function useCreateCalendarEvent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data: Parameters<typeof calendarApi.createEvent>[0]) =>
+      calendarApi.createEvent(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['calendar'] })
+    },
+  })
+}
+
 export function useCalendarSyncStatus() {
   const query = useQuery({
     queryKey: ['calendar', 'sync', 'status'],
@@ -108,4 +119,14 @@ export function useCalendarResorts() {
   })
   const resorts = Array.isArray(query.data) ? query.data : []
   return { ...query, resorts }
+}
+
+export function useCalendarRooms() {
+  const query = useQuery({
+    queryKey: ['calendar', 'rooms'],
+    queryFn: () => calendarApi.getRooms(),
+    staleTime: 5 * 60 * 1000,
+  })
+  const rooms = Array.isArray(query.data) ? query.data : []
+  return { ...query, rooms }
 }

@@ -1,14 +1,14 @@
 /**
  * ResourceLane - Lane for rooms/agents/resorts with event blocks
+ * 30-minute drop slots with proper position calculation
  */
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { EventCard } from './event-card'
+import { PX_PER_HOUR, PX_PER_SLOT, SLOTS_PER_HOUR } from './time-scale-column'
 import { cn } from '@/lib/utils'
 import type { CalendarEvent } from '@/types/calendar'
 import type { DragSettings } from '@/types/calendar'
 
-const PX_PER_HOUR = 48
-const SLOTS_PER_HOUR = 2
 const MINUTES_PER_SLOT = 30
 
 function parseDateKey(key: string): Date {
@@ -21,7 +21,7 @@ function getSlotOffset(iso: string, dayStart: Date): number {
   const diffMs = d.getTime() - dayStart.getTime()
   const diffMins = Math.floor(diffMs / 60000)
   const slotIndex = Math.floor(diffMins / MINUTES_PER_SLOT)
-  return Math.max(0, slotIndex) * (PX_PER_HOUR / SLOTS_PER_HOUR)
+  return Math.max(0, slotIndex) * PX_PER_SLOT
 }
 
 function getSlotHeight(startIso: string, endIso: string): number {
@@ -30,7 +30,17 @@ function getSlotHeight(startIso: string, endIso: string): number {
   const diffMs = end.getTime() - start.getTime()
   const diffMins = Math.max(MINUTES_PER_SLOT, Math.floor(diffMs / 60000))
   const slots = Math.ceil(diffMins / MINUTES_PER_SLOT)
-  return slots * (PX_PER_HOUR / SLOTS_PER_HOUR)
+  return slots * PX_PER_SLOT
+}
+
+/** Convert drop offsetY to hour and minute (30-min slots, day starts 7:00) */
+function offsetToSlot(offsetY: number): { hour: number; minute: number } {
+  const slotIndex = Math.max(0, Math.floor(offsetY / PX_PER_SLOT))
+  const totalSlots = 14 * SLOTS_PER_HOUR
+  const clamped = Math.min(slotIndex, totalSlots - 1)
+  const hour = 7 + Math.floor(clamped / SLOTS_PER_HOUR)
+  const minute = (clamped % SLOTS_PER_HOUR) * MINUTES_PER_SLOT
+  return { hour, minute }
 }
 
 export interface ResourceLaneProps {
@@ -70,20 +80,38 @@ export function ResourceLane({
     })
   }, [events, resourceId, resourceType])
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const [dragOverKey, setDragOverKey] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!draggingEventId) setDragOverKey(null)
+  }, [draggingEventId])
+
+  const handleDragOver = (e: React.DragEvent, dateKey: string) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
+    setDragOverKey(dateKey)
   }
 
-  const handleDrop = (e: React.DragEvent, dateKey: string, hour: number, minute: number) => {
+  const handleDragLeave = (e: React.DragEvent) => {
+    const related = e.relatedTarget as Node | null
+    if (!related || !(e.currentTarget as HTMLElement).contains(related)) {
+      setDragOverKey(null)
+    }
+  }
+
+  const handleDrop = (e: React.DragEvent, dateKey: string) => {
+    setDragOverKey(null)
     e.preventDefault()
     try {
       const raw = e.dataTransfer.getData('application/json')
       const data = raw ? JSON.parse(raw) : null
       const eventId = data?.eventId
-      if (eventId && onSlotDrop) {
-        onSlotDrop({ date: dateKey, hour, minute }, eventId)
-      }
+      if (!eventId || !onSlotDrop) return
+      const target = e.currentTarget as HTMLElement
+      const rect = target.getBoundingClientRect()
+      const offsetY = e.clientY - rect.top
+      const { hour, minute } = offsetToSlot(offsetY)
+      onSlotDrop({ date: dateKey, hour, minute }, eventId)
     } catch {
       // ignore
     }
@@ -101,9 +129,13 @@ export function ResourceLane({
           return (
             <div
               key={dayKey}
-              className="flex-1 min-w-[120px] relative border-r border-border"
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, dayKey, 12, 0)}
+              className={cn(
+                'flex-1 min-w-[120px] relative border-r border-border transition-colors',
+                dragOverKey === dayKey && 'bg-accent/5 ring-1 ring-accent/30'
+              )}
+              onDragOver={(e) => handleDragOver(e, dayKey)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, dayKey)}
             >
               {(filteredEvents ?? []).map((ev) => {
                 const evDate = new Date(ev.start_at)

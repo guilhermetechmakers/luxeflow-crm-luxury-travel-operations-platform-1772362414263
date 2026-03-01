@@ -13,6 +13,7 @@ export type CalendarEventType =
 export type CalendarEventStatus =
   | 'pending'
   | 'confirmed'
+  | 'payment_due'
   | 'completed'
   | 'cancelled'
   | 'overdue'

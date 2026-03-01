@@ -3,13 +3,15 @@
  */
 import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
-import { CalendarWeekView } from '@/components/calendar'
+import { CalendarWeekView, QuickCreateDialog } from '@/components/calendar'
 import {
   useCalendarEvents,
   useUpdateCalendarEvent,
+  useCreateCalendarEvent,
   useCalendarSyncStatus,
   useCalendarAgents,
   useCalendarResorts,
+  useCalendarRooms,
 } from '@/hooks/use-calendar'
 import { calendarApi } from '@/api/calendar'
 import type { CalendarFilters, ViewMode, DragSettings } from '@/types/calendar'
@@ -27,6 +29,8 @@ export function Calendar() {
     resortIds: [],
     status: [],
   })
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false)
+  const [quickCreateType, setQuickCreateType] = useState<'task' | 'room_block'>('task')
 
   const { events, dateRange, isLoading } = useCalendarEvents(
     weekOffset,
@@ -35,8 +39,10 @@ export function Calendar() {
   )
   const { agents } = useCalendarAgents()
   const { resorts } = useCalendarResorts()
+  const { rooms } = useCalendarRooms()
   const { syncConfig } = useCalendarSyncStatus()
   const updateEvent = useUpdateCalendarEvent()
+  const createEvent = useCreateCalendarEvent()
 
   const handleReschedule = useCallback(
     async (eventId: string, updates: { start_at: string; end_at: string }) => {
@@ -92,8 +98,37 @@ export function Calendar() {
     [updateEvent]
   )
 
+  const handleQuickCreate = useCallback(
+    async (data: {
+      type: 'task' | 'room_block'
+      title: string
+      start_at: string
+      end_at: string
+      room_id?: string
+      resort_id?: string
+      agent_id?: string
+    }) => {
+      await createEvent.mutateAsync(data)
+    },
+    [createEvent]
+  )
+
+  const openQuickCreate = useCallback((type: 'task' | 'room_block') => {
+    setQuickCreateType(type)
+    setQuickCreateOpen(true)
+  }, [])
+
   return (
     <div className="space-y-6 animate-fade-in">
+      <QuickCreateDialog
+        open={quickCreateOpen}
+        onOpenChange={setQuickCreateOpen}
+        type={quickCreateType}
+        dateRange={dateRange}
+        resorts={resorts}
+        rooms={rooms}
+        onCreate={handleQuickCreate}
+      />
       <CalendarWeekView
         events={events}
         agents={agents}
@@ -111,6 +146,8 @@ export function Calendar() {
         onSetupSync={handleSetupSync}
         onExportIcal={handleExportIcal}
         onMarkComplete={handleMarkComplete}
+        onAddTask={() => openQuickCreate('task')}
+        onAddRoomBlock={() => openQuickCreate('room_block')}
         isLoading={isLoading}
       />
     </div>

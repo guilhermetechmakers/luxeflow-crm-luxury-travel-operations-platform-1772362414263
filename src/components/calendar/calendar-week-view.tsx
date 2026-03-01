@@ -61,6 +61,8 @@ export interface CalendarWeekViewProps {
   onSetupSync?: (config: { provider: 'google' | 'ical'; sync_type: 'one-way' | 'two-way' }) => void
   onExportIcal?: (bookingIds?: string[]) => void
   onMarkComplete?: (event: CalendarEvent) => void
+  onAddTask?: () => void
+  onAddRoomBlock?: () => void
   isLoading?: boolean
   className?: string
 }
@@ -82,6 +84,8 @@ function CalendarWeekViewInner({
   onSetupSync,
   onExportIcal,
   onMarkComplete,
+  onAddTask,
+  onAddRoomBlock,
   isLoading = false,
   className,
 }: CalendarWeekViewProps) {
@@ -185,6 +189,8 @@ function CalendarWeekViewInner({
             }
             onSetupSync={onSetupSync}
             onExportIcal={() => onExportIcal?.()}
+            onAddEvent={onAddTask}
+            onAddRoomBlock={onAddRoomBlock}
           />
         </div>
       </div>

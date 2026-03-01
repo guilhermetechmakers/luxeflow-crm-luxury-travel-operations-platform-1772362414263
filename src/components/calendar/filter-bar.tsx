@@ -19,6 +19,7 @@ import type { Agent, Resort } from '@/types/calendar'
 const STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending' },
   { value: 'confirmed', label: 'Confirmed' },
+  { value: 'payment_due', label: 'Payment Due' },
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },
   { value: 'overdue', label: 'Overdue' },
