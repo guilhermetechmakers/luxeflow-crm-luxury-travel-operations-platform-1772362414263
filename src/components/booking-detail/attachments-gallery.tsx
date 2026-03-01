@@ -1,17 +1,20 @@
 /**
  * AttachmentsGallery - Document gallery with preview, versioning, download links
+ * Drag-and-drop upload with progress indicator
  */
+import { useState, useCallback, useRef } from 'react'
 import { FileText, Download, Upload } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatShortDate } from '@/lib/format'
+import { validateUploadFile } from '@/lib/validation'
 import { cn } from '@/lib/utils'
 import type { AttachmentDetail } from '@/types/booking'
 
 export interface AttachmentsGalleryProps {
   attachments: AttachmentDetail[]
   isLoading?: boolean
-  onUpload?: (file: { filename: string; url: string; type: string }) => void
+  onUpload?: (file: { filename: string; url: string; type: string }) => void | Promise<void>
   canEdit?: boolean
 }
 
@@ -29,6 +32,91 @@ export function AttachmentsGallery({
   canEdit = false,
 }: AttachmentsGalleryProps) {
   const list = attachments ?? []
+  const [isDragging, setIsDragging] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (canEdit && onUpload) setIsDragging(true)
+    },
+    [canEdit, onUpload]
+  )
+
+  const handleDragLeave = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setIsDragging(false)
+    },
+    []
+  )
+
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setIsDragging(false)
+      if (!canEdit || !onUpload) return
+      const file = e.dataTransfer.files?.[0]
+      if (!file) return
+      const validation = validateUploadFile(file)
+      if (!validation.valid) {
+        setUploadError(validation.error ?? 'Invalid file')
+        return
+      }
+      setUploadError(null)
+      setUploadProgress(20)
+      try {
+        const url = URL.createObjectURL(file)
+        setUploadProgress(60)
+        await onUpload({
+          filename: file.name,
+          url,
+          type: file.type.startsWith('image/') ? 'itinerary' : 'other',
+        })
+        setUploadProgress(100)
+      } catch {
+        setUploadError('Upload failed')
+      } finally {
+        setTimeout(() => setUploadProgress(0), 500)
+      }
+    },
+    [canEdit, onUpload]
+  )
+
+  const handleFileSelect = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file || !onUpload) return
+      e.target.value = ''
+      const validation = validateUploadFile(file)
+      if (!validation.valid) {
+        setUploadError(validation.error ?? 'Invalid file')
+        return
+      }
+      setUploadError(null)
+      setUploadProgress(20)
+      try {
+        const url = URL.createObjectURL(file)
+        setUploadProgress(60)
+        await onUpload({
+          filename: file.name,
+          url,
+          type: file.type.startsWith('image/') ? 'itinerary' : 'other',
+        })
+        setUploadProgress(100)
+      } catch {
+        setUploadError('Upload failed')
+      } finally {
+        setTimeout(() => setUploadProgress(0), 500)
+      }
+    },
+    [onUpload]
+  )
 
   if (isLoading) {
     return (
@@ -57,34 +145,68 @@ export function AttachmentsGallery({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle>Attachments</CardTitle>
           {canEdit && onUpload && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                const input = document.createElement('input')
-                input.type = 'file'
-                input.accept = '.pdf,.doc,.docx,.xls,.xlsx'
-                input.onchange = () => {
-                  const file = input.files?.[0]
-                  if (file) {
-                    const url = URL.createObjectURL(file)
-                    onUpload({
-                      filename: file.name,
-                      url,
-                      type: 'other',
-                    })
-                  }
-                }
-                input.click()
-              }}
-            >
-              <Upload className="h-4 w-4" aria-hidden />
-              Upload
-            </Button>
+            <>
+              <input
+                ref={inputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,image/jpeg,image/jpg,image/png"
+                className="sr-only"
+                onChange={handleFileSelect}
+                aria-label="Upload file"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => inputRef.current?.click()}
+              >
+                <Upload className="h-4 w-4" aria-hidden />
+                Upload
+              </Button>
+            </>
           )}
         </div>
       </CardHeader>
       <CardContent>
+        {uploadError && (
+          <div
+            className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive"
+            role="alert"
+          >
+            {uploadError}
+          </div>
+        )}
+        {uploadProgress > 0 && uploadProgress < 100 && (
+          <div className="mb-4">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full bg-accent transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">Uploading...</p>
+          </div>
+        )}
+        {canEdit && onUpload && (
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={cn(
+              'mb-4 rounded-lg border-2 border-dashed p-6 text-center transition-colors',
+              isDragging
+                ? 'border-accent bg-accent/10'
+                : 'border-border hover:border-accent/30'
+            )}
+          >
+            <Upload className="mx-auto h-10 w-10 text-muted-foreground" aria-hidden />
+            <p className="mt-2 text-sm text-muted-foreground">
+              Drag and drop files here, or click Upload
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              PDF, DOC, XLS, JPEG, PNG (max 10MB)
+            </p>
+          </div>
+        )}
         {list.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-12 text-center">
             <FileText className="h-12 w-12 text-muted-foreground" aria-hidden />

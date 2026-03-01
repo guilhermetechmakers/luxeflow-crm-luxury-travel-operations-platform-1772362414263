@@ -424,6 +424,43 @@ export const bookingsApi = {
   },
 
   /**
+   * POST /api/bookings/:id/approvals/:approvalId/action - approve, deny, or escalate
+   */
+  async approvalAction(
+    id: string,
+    approvalId: string,
+    action: 'approve' | 'deny' | 'escalate',
+    payload?: { comments?: string }
+  ): Promise<ApprovalDetail | null> {
+    try {
+      const res = await api.post<ApprovalDetail>(
+        `/bookings/${id}/approvals/${approvalId}/action`,
+        { action, ...payload }
+      )
+      return res ?? null
+    } catch {
+      const detail = buildMockBookingDetail(id)
+      const approvals = detail?.approvals ?? []
+      const existing = approvals.find((a) => a.id === approvalId)
+      if (existing) {
+        return {
+          ...existing,
+          status: action === 'approve' ? 'approved' : action === 'deny' ? 'denied' : 'pending',
+          history: [
+            ...(existing.history ?? []),
+            {
+              timestamp: new Date().toISOString(),
+              actor: 'Current User',
+              action: action === 'approve' ? 'Approved' : action === 'deny' ? 'Denied' : 'Escalated',
+            },
+          ],
+        }
+      }
+      return null
+    }
+  },
+
+  /**
    * POST /api/bookings/:id/approvals
    */
   async requestApproval(id: string, payload?: { approver_id?: string }): Promise<ApprovalDetail | null> {
@@ -573,14 +610,27 @@ function buildMockBookingDetail(id: string): BookingDetail | null {
     { id: 's1', booking_id: id, supplier_id: 'sup1', supplier_name: 'Villa Serenity Management', reference_numbers: 'VS-2025-001', contact: 'reservations@villaserenity.com' },
   ]
 
+  const resortData = (MOCK_RESORTS ?? []).find((r) => r.id === summary.resort_id)
   return {
     id: summary.id,
     reference: summary.booking_ref,
     client_id: summary.client_id,
     client: { id: summary.client_id, name: summary.client_name },
     resort_id: summary.resort_id,
-    resort: { id: summary.resort_id, name: summary.resort_name, location: (MOCK_RESORTS ?? []).find((r) => r.id === summary.resort_id)?.location },
+    resort: {
+      id: summary.resort_id,
+      name: summary.resort_name,
+      location: resortData?.location,
+      transfer_time_minutes: 45,
+    },
+    room_category: {
+      id: 'rc1',
+      name: 'Deluxe Suite',
+      bed_config: '1 King, 1 Sofa bed',
+      capacity: 4,
+    },
     status: summary.status,
+    room_category_id: 'rc1',
     check_in: summary.check_in,
     check_out: summary.check_out,
     total_amount: summary.value,

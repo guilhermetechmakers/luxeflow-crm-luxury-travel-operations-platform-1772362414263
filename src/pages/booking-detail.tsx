@@ -20,6 +20,8 @@ import {
   ActionsBar,
   BookingOperationsWidgets,
   DeadlinesSlaCard,
+  ResortRoomPanel,
+  RelatedEntitiesRail,
 } from '@/components/booking-detail'
 import { cn } from '@/lib/utils'
 import type { TimelineStageType } from '@/types/booking'
@@ -53,6 +55,7 @@ export function BookingDetail() {
     addAttachmentMutation,
     requestApprovalMutation,
     createInvoiceMutation,
+    approvalActionMutation,
   } = useBookingDetail(bookingId)
 
   const currentStatusForTimeline =
@@ -113,6 +116,30 @@ export function BookingDetail() {
     [addAttachmentMutation]
   )
 
+  const handleApprove = useCallback(
+    async (approvalId: string) => {
+      try {
+        await approvalActionMutation.mutateAsync({ approvalId, action: 'approve' })
+        toast.success('Approval granted')
+      } catch {
+        toast.error('Failed to approve')
+      }
+    },
+    [approvalActionMutation]
+  )
+
+  const handleDeny = useCallback(
+    async (approvalId: string) => {
+      try {
+        await approvalActionMutation.mutateAsync({ approvalId, action: 'deny' })
+        toast.success('Approval denied')
+      } catch {
+        toast.error('Failed to deny')
+      }
+    },
+    [approvalActionMutation]
+  )
+
   const handleCreatePayment = useCallback(() => {
     toast.info('Add payment milestone dialog')
   }, [])
@@ -139,7 +166,8 @@ export function BookingDetail() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="flex flex-col gap-6 animate-fade-in lg:flex-row">
+      <main className="min-w-0 flex-1 space-y-6">
       <BookingHeaderCard
         detail={detail}
         isLoading={isLoading}
@@ -230,6 +258,11 @@ export function BookingDetail() {
 
         <Tabs.Content value="summary" className="mt-4">
           <div className="grid gap-6 lg:grid-cols-2">
+            <ResortRoomPanel
+              detail={detail}
+              isLoading={isLoading}
+              canEdit={false}
+            />
             <TimelineComponent
               stages={timeline}
               currentStatus={currentStatusForTimeline}
@@ -296,10 +329,24 @@ export function BookingDetail() {
             approvals={approvals}
             isLoading={isLoading}
             onRequestApproval={handleRequestApproval}
+            onApprove={handleApprove}
+            onDeny={handleDeny}
             canEdit
           />
         </Tabs.Content>
       </Tabs.Root>
+      </main>
+
+      <aside className="hidden w-72 shrink-0 lg:block">
+        <div className="sticky top-24">
+          <RelatedEntitiesRail
+            detail={detail}
+            tasks={[]}
+            proposals={[]}
+            isLoading={isLoading}
+          />
+        </div>
+      </aside>
     </div>
   )
 }

@@ -257,11 +257,15 @@ export interface ResortRef {
   id: string
   name: string
   location?: string
+  transfer_time?: string
+  transfer_time_minutes?: number
 }
 
 export interface RoomCategoryRef {
   id: string
   name: string
+  bed_config?: string
+  capacity?: number
 }
 
 export interface BookingDetail {

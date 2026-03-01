@@ -59,6 +59,20 @@ export function useBookingDetail(bookingId: string) {
     onSuccess: () => invalidate(),
   })
 
+  const approvalActionMutation = useMutation({
+    mutationFn: ({
+      approvalId,
+      action,
+      comments,
+    }: {
+      approvalId: string
+      action: 'approve' | 'deny' | 'escalate'
+      comments?: string
+    }) =>
+      bookingsApi.approvalAction(bookingId, approvalId, action, { comments }),
+    onSuccess: () => invalidate(),
+  })
+
   const createPaymentMutation = useMutation({
     mutationFn: (milestone: { milestone: string; due_date: string; amount: number; currency: string }) =>
       bookingsApi.createPayment(bookingId, milestone),
@@ -88,5 +102,6 @@ export function useBookingDetail(bookingId: string) {
     requestApprovalMutation,
     createPaymentMutation,
     createInvoiceMutation,
+    approvalActionMutation,
   }
 }

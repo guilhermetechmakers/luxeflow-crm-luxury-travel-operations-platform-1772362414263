@@ -1,8 +1,10 @@
 /**
  * BookingHeaderCard - Summary header with key metadata and action controls
  * LuxeFlow design: crisp white, olive accents, soft shadows
+ * Outstanding balance: visual emphasis for overdue or due soon
  */
 import { Link } from 'react-router-dom'
+import { ConflictChecker } from '@/lib/booking-utils'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader } from '@/components/ui/card'
@@ -70,6 +72,17 @@ export function BookingHeaderCard({
   const statusLabel = STATUS_LABELS[detail.status] ?? detail.status
   const statusClass = STATUS_VARIANTS[detail.status] ?? 'bg-muted text-muted-foreground'
 
+  const outstandingBalance = detail.outstanding_balance ?? 0
+  const payments = (detail.payments ?? []).filter((p) => p.status !== 'paid')
+  const nextUnpaid = payments.sort(
+    (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+  )[0]
+  const balanceUrgency = ConflictChecker.getBalanceUrgency(
+    outstandingBalance,
+    nextUnpaid?.due_date,
+    nextUnpaid?.amount
+  )
+
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center gap-4">
@@ -121,10 +134,25 @@ export function BookingHeaderCard({
                     <span
                       className={cn(
                         'font-medium',
-                        (detail.outstanding_balance ?? 0) > 0 && 'text-amber-600'
+                        outstandingBalance > 0 && balanceUrgency === 'overdue' && 'text-destructive font-semibold',
+                        outstandingBalance > 0 && balanceUrgency === 'due_soon' && 'text-amber-600',
+                        outstandingBalance > 0 && balanceUrgency === 'ok' && 'text-amber-600'
                       )}
+                      title={
+                        balanceUrgency === 'overdue'
+                          ? 'Payment overdue'
+                          : balanceUrgency === 'due_soon'
+                            ? 'Payment due soon'
+                            : undefined
+                      }
                     >
-                      {formatCurrency(detail.outstanding_balance, detail.currency)}
+                      {formatCurrency(outstandingBalance, detail.currency)}
+                      {balanceUrgency === 'overdue' && (
+                        <span className="ml-1 text-xs font-normal">(overdue)</span>
+                      )}
+                      {balanceUrgency === 'due_soon' && (
+                        <span className="ml-1 text-xs font-normal">(due soon)</span>
+                      )}
                     </span>
                   </span>
                 </div>
