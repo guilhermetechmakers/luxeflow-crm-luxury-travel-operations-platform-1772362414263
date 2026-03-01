@@ -1,40 +1,56 @@
-const API_BASE = import.meta.env.VITE_API_URL ?? '/api'
+/**
+ * API utilities - native fetch wrapper with auth and error handling
+ * Used for dashboard and other API calls
+ */
 
-type RequestConfig = RequestInit & {
-  params?: Record<string, string>
-}
-
-async function request<T>(
-  endpoint: string,
-  config: RequestConfig = {}
-): Promise<T> {
-  const { params, ...init } = config
-  let url = `${API_BASE}${endpoint}`
-  if (params) {
-    const search = new URLSearchParams(params).toString()
-    url += `?${search}`
-  }
-  const headers: HeadersInit = {
+const getAuthHeaders = async (): Promise<Record<string, string>> => {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...init.headers,
   }
-  const res = await fetch(url, { ...init, headers })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }))
-    throw new Error(err.message ?? `Request failed: ${res.status}`)
+  try {
+    const { supabase } = await import('@/lib/supabase')
+    const { data } = await supabase.auth.getSession()
+    const token = data?.session?.access_token
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
+  } catch {
+    // No auth - continue without token
   }
-  return res.json() as Promise<T>
+  return headers
 }
 
+export async function apiFetch<T>(
+  url: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const base = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api'
+  const fullUrl = url.startsWith('http') ? url : `${base}${url}`
+  const headers = await getAuthHeaders()
+  const response = await fetch(fullUrl, {
+    ...options,
+    headers: { ...headers, ...(options.headers as Record<string, string>) },
+  })
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || `HTTP ${response.status}`)
+  }
+  const contentType = response.headers.get('content-type')
+  if (contentType?.includes('application/json')) {
+    return response.json() as Promise<T>
+  }
+  return response.text() as unknown as T
+}
+
+/** API client with get/post/put/patch/delete - uses apiFetch */
 export const api = {
-  get: <T>(endpoint: string, config?: RequestConfig) =>
-    request<T>(endpoint, { ...config, method: 'GET' }),
-  post: <T>(endpoint: string, body?: unknown, config?: RequestConfig) =>
-    request<T>(endpoint, { ...config, method: 'POST', body: body ? JSON.stringify(body) : undefined }),
-  put: <T>(endpoint: string, body?: unknown, config?: RequestConfig) =>
-    request<T>(endpoint, { ...config, method: 'PUT', body: body ? JSON.stringify(body) : undefined }),
-  patch: <T>(endpoint: string, body?: unknown, config?: RequestConfig) =>
-    request<T>(endpoint, { ...config, method: 'PATCH', body: body ? JSON.stringify(body) : undefined }),
-  delete: <T>(endpoint: string, config?: RequestConfig) =>
-    request<T>(endpoint, { ...config, method: 'DELETE' }),
+  get: <T>(endpoint: string) => apiFetch<T>(endpoint),
+  post: <T>(endpoint: string, data: unknown) =>
+    apiFetch<T>(endpoint, { method: 'POST', body: JSON.stringify(data) }),
+  put: <T>(endpoint: string, data: unknown) =>
+    apiFetch<T>(endpoint, { method: 'PUT', body: JSON.stringify(data) }),
+  patch: <T>(endpoint: string, data: unknown) =>
+    apiFetch<T>(endpoint, { method: 'PATCH', body: JSON.stringify(data) }),
+  delete: <T>(endpoint: string) =>
+    apiFetch<T>(endpoint, { method: 'DELETE' }),
 }

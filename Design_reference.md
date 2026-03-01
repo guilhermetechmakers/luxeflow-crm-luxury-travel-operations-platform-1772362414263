@@ -326,56 +326,61 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-- Maintain premium visuals, generous whitespace, and a calm, trustworthy interface.
-- Ensure visual hierarchy supports quick user comprehension during the reset flow.
-- Keep interactions smooth with subtle hover/focus transitions and consistent button states.
+- Use the luxury, modern aesthetic with generous whitespace, subtle opulence
+- Cards with soft shadows, light borders, and rounded corners
+- Olive green accents for primary actions
+- Serif headings (Playfair Display/Georgia) and sans-serif body text (Lato/Helvetica Neue)
+- Focus on clarity and calm professionalism
+- Ensure consistent typography, spacing, and alignment
+- Data visualizations are minimalist; avoid heavy grids
 
-Color Palette, Typography, and Layout
-- Follow the specified LuxeFlow color tokens and typography.
-- Cards with subtle shadows (rgba(34,34,34,0.07)), 4-8px border radius.
-- Accent actions in olive green (#8A9A5B); backgrounds in white (#FFFFFF) and neutrals (#F6F6F6, #EEEEEE).
-- High-contrast text (#222222) with secondary text in #888888.
+Visual Style
+
+Color Palette:
+- Primary: #FFFFFF
+- Accent: #8A9A5B
+- Neutrals: #F6F6F6, #EEEEEE
+- Text: #222222, #888888
+- Supporting: #C6AB62
+
+Typography & Layout:
+- Headings: serif (Playfair Display, Georgia)
+- Body: sans-serif (Lato, Helvetica Neue)
+- Hierarchy: bold, spacious headers; clear body
+- Spacing: generous padding, ample whitespace
+- Alignment: left-aligned content; center headers/callouts
+- Special Treatments: uppercase section labels; italic quotes
+
+Key Design Elements
+- Card Design: white background, subtle box-shadow, 4-8px radius; dividers; hover lift; border accents
+- Navigation: sticky header, logo alignment, hover underline, active state highlight
+- Data Visualization: minimalist charts if used; emphasis on clarity
+- Interactive Elements: olive green buttons; white inputs with light borders; accessible focus states; smooth transitions
+
+Design Philosophy
+- Refined luxury, minimalism with subtle opulence
+- Clear, airy layouts; emphasis on legibility and premium feel
+- Deterministic, low-noise UI to support fast decision-making
 
 Mandatory Coding Standards — Runtime Safety
-CRITICAL: Implement all runtime safety rules in the generated code:
-1) Supabase-like results handling:
-   - const items = data ?? []
-2) Array methods safety:
-   - (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
-3) useState defaults for arrays/objects:
-   - useState<Type[]>([])
-4) API response shapes:
-   - const list = Array.isArray(response?.data) ? response.data : []
-5) Optional chaining:
-   - obj?.property?.nested
-6) Destructuring with defaults:
-   - const { items = [], count = 0 } = response ?? {}
+- Supabase/API results: const items = data ?? []
+- Arrays: (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
+- useState: useState<Type[]>([]) for arrays
+- API responses: const list = Array.isArray(response?.data) ? response.data : []
+- Optional chaining: obj?.property?.nested
+- Destructuring with defaults: const { items = [], count = 0 } = response ?? {}
 
-Project Context Integration
-- This feature integrates with: Auth + Roles (Admin, Agent, Ops, Finance), Sign-up, Login, SSO, and session management.
-- Connected pages: Login Page with secure login and SSO options; ensure seamless navigation between Login, Sign Up, and Password Reset.
-- Ensure consistent design language and components across pages for a cohesive UX.
+Connected Pages
+- Login Page: Secure login form for existing users with SSO options and links to sign up and password reset
 
 Deliverables
-- Complete React TypeScript components for Password Reset Request, Password Reset with token, TokenStatusBanner, and supportive UI elements.
-- API service layer with typed request/response contracts, including proper error handling and null safety.
-- Tests (unit/integration) covering:
-  - Email validation and error paths.
-  - Token parsing and validation paths (valid, invalid, expired).
-  - Password strength and matching logic.
-  - Safe handling of API responses with potential null data.
-- Documentation:
-  - API contracts summary.
-  - Data model notes for PasswordResetToken and related flows.
-  - Deployment considerations for security and performance (rate limiting, token expiry windows, etc.).
+- Fully functional Dashboard page and supporting components
+- TypeScript types for data models
+- API contracts and stubbed/mocked responses for local development
+- Reusable design-system-aligned components
+- Comprehensive README with run/debug instructions and testing notes
 
-Notes for AI Development Tool
-- Leverage existing design tokens and component library if present; otherwise implement lightweight, accessible equivalents aligned to LuxeFlow style.
-- Ensure code is modular, reusable, and easy to extend (e.g., if email templates or token strategies evolve).
-- Include robust error handling and graceful fallbacks to satisfy the runtime safety requirements.
-- Provide clear comments explaining security decisions and data flow, especially around token handling and password updates.
-
-If you need, I can produce a ready-to-run code scaffold (TypeScript React) with the components, API service stubs, and example tests that adhere to the above standards.
+If you need a concrete file structure, starter code snippets, or API contract examples to begin scaffolding, I can provide those next.
 
 ## Implementation Notes
 

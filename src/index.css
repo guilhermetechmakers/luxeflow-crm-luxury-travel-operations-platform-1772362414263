@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* LuxeFlow fonts: Lato (body), Playfair Display (headings) - loaded via index.html */
 @layer base {
   :root {
     /* LuxeFlow CRM Design System - RGB values for theming */
