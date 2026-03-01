@@ -326,61 +326,37 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-- Use the luxury, modern aesthetic with generous whitespace, subtle opulence
-- Cards with soft shadows, light borders, and rounded corners
-- Olive green accents for primary actions
-- Serif headings (Playfair Display/Georgia) and sans-serif body text (Lato/Helvetica Neue)
-- Focus on clarity and calm professionalism
-- Ensure consistent typography, spacing, and alignment
-- Data visualizations are minimalist; avoid heavy grids
+- Ensure consistent usage of cards, chips, and table/list patterns.
+- Use primary color white (#FFFFFF) for surfaces; olive green (#8A9A5B) for primary action accents.
+- Maintain warm neutrals (#F6F6F6, #EEEEEE) for backgrounds and section delineation.
+- Use deep charcoal (#222222) for primary text, with #888888 for secondary information.
+- Include soft gold (#C6AB62) highlights for decorative accents.
+- Typography: Playfair Display or Georgia for headings; Lato or Helvetica Neue for body.
+- Spacing: Generous white space; clear block separation; consistent margins.
+- Interactive elements: Subtle hover and focus states, accessible with keyboard.
 
-Visual Style
-
-Color Palette:
-- Primary: #FFFFFF
-- Accent: #8A9A5B
-- Neutrals: #F6F6F6, #EEEEEE
-- Text: #222222, #888888
-- Supporting: #C6AB62
-
-Typography & Layout:
-- Headings: serif (Playfair Display, Georgia)
-- Body: sans-serif (Lato, Helvetica Neue)
-- Hierarchy: bold, spacious headers; clear body
-- Spacing: generous padding, ample whitespace
-- Alignment: left-aligned content; center headers/callouts
-- Special Treatments: uppercase section labels; italic quotes
-
-Key Design Elements
-- Card Design: white background, subtle box-shadow, 4-8px radius; dividers; hover lift; border accents
-- Navigation: sticky header, logo alignment, hover underline, active state highlight
-- Data Visualization: minimalist charts if used; emphasis on clarity
-- Interactive Elements: olive green buttons; white inputs with light borders; accessible focus states; smooth transitions
-
-Design Philosophy
-- Refined luxury, minimalism with subtle opulence
-- Clear, airy layouts; emphasis on legibility and premium feel
-- Deterministic, low-noise UI to support fast decision-making
+---
 
 Mandatory Coding Standards — Runtime Safety
-- Supabase/API results: const items = data ?? []
-- Arrays: (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
-- useState: useState<Type[]>([]) for arrays
-- API responses: const list = Array.isArray(response?.data) ? response.data : []
-- Optional chaining: obj?.property?.nested
-- Destructuring with defaults: const { items = [], count = 0 } = response ?? {}
 
-Connected Pages
-- Login Page: Secure login form for existing users with SSO options and links to sign up and password reset
+CRITICAL: Follow these rules in ALL generated code to prevent runtime crashes.
 
-Deliverables
-- Fully functional Dashboard page and supporting components
-- TypeScript types for data models
-- API contracts and stubbed/mocked responses for local development
-- Reusable design-system-aligned components
-- Comprehensive README with run/debug instructions and testing notes
+1. Supabase/query results: Always use nullish coalescing — const items = data ?? [].
+2. Array methods: Never call on values that could be null/undefined. Use (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : [].
+3. React useState for arrays/objects: Initialize with type-safe defaults, e.g., const [clients, setClients] = useState<Client[]>([]); Do not use useState() or useState(null) for arrays.
+4. API response shapes: Always validate — const list = Array.isArray(response?.data) ? response.data : [].
+5. Optional chaining: Use safe access when traversing API responses or DB results, e.g. client?.contact?.email.
+6. Destructuring with defaults: const { items = [], count = 0 } = response ?? {}.
 
-If you need a concrete file structure, starter code snippets, or API contract examples to begin scaffolding, I can provide those next.
+---
+
+PROJECT CONTEXT: TARGET PAGE: Clients List
+Description: Master list of clients with search, filters (VIP, family, last active), bulk actions, and quick-select to open Client Detail or create a booking.
+
+Project: LuxeFlow CRM — Luxury Travel Operations Platform
+Core pages include: Auth/Roles, Dashboard, Clients (list + detail), Bookings, Calendar, Tasks, Resort Bible, Reporting, Team Chat, and an AI Assistant. The UI should be premium, responsive, permissioned, and designed for fast-paced luxury operations. The visual style, color palette, typography, and design philosophy provided above should be strictly followed.
+
+Generate the complete, detailed prompt now, ensuring all runtime-safety constraints are integrated and clearly delineated for an AI development tool to implement end-to-end.
 
 ## Implementation Notes
 

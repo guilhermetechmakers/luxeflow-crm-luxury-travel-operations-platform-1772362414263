@@ -1,17 +1,36 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import { clientsApi } from '@/api/clients'
+import type { Client } from '@/types/client'
 
 const steps = ['Client', 'Resort & Room', 'Rates', 'Payment Schedule', 'Itinerary', 'Review']
+
+function getClientName(client: Client): string {
+  return `${client?.firstName ?? ''} ${client?.lastName ?? ''}`.trim() || 'Unknown'
+}
 
 export function BookingWizard() {
   const [step, setStep] = useState(0)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const clientIdFromUrl = searchParams.get('client') ?? undefined
+  const [prefilledClient, setPrefilledClient] = useState<Client | null>(null)
+
+  useEffect(() => {
+    if (!clientIdFromUrl) {
+      setPrefilledClient(null)
+      return
+    }
+    clientsApi.getClient(clientIdFromUrl).then((c) => {
+      setPrefilledClient(c ?? null)
+    })
+  }, [clientIdFromUrl])
 
   const handleNext = () => {
     if (step < steps.length - 1) setStep(step + 1)
@@ -60,7 +79,26 @@ export function BookingWizard() {
             <>
               <div>
                 <Label>Client</Label>
-                <Input placeholder="Search or select client" className="mt-1" />
+                {prefilledClient ? (
+                  <div className="mt-1 flex items-center gap-2 rounded-md border border-border bg-secondary/30 px-3 py-2">
+                    <span className="font-medium">{getClientName(prefilledClient)}</span>
+                    {prefilledClient.email && (
+                      <span className="text-sm text-muted-foreground">
+                        {prefilledClient.email}
+                      </span>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPrefilledClient(null)}
+                      className="ml-auto"
+                    >
+                      Change
+                    </Button>
+                  </div>
+                ) : (
+                  <Input placeholder="Search or select client" className="mt-1" />
+                )}
               </div>
             </>
           )}
