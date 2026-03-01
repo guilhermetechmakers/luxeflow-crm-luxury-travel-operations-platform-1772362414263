@@ -21,7 +21,7 @@ import { Reports } from '@/pages/reports'
 import { Chat } from '@/pages/chat'
 import { AIAssistant } from '@/pages/ai-assistant'
 import { Admin } from '@/pages/admin'
-import { Settings } from '@/pages/settings'
+import { UserProfile } from '@/pages/user-profile'
 import { Transactions } from '@/pages/transactions'
 import { Documents } from '@/pages/documents'
 import { NotFound } from '@/pages/not-found'
@@ -59,7 +59,8 @@ export const router = createBrowserRouter([
       { path: 'ai', element: <AIAssistant /> },
       { path: 'admin', element: <Admin /> },
       { path: 'admin/users', element: <Admin /> },
-      { path: 'settings', element: <Settings /> },
+      { path: 'profile', element: <UserProfile /> },
+      { path: 'settings', element: <UserProfile /> },
       { path: 'transactions', element: <Transactions /> },
       { path: 'documents', element: <Documents /> },
     ],

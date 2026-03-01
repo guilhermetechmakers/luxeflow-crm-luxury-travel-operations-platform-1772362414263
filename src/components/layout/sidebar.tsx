@@ -16,6 +16,7 @@ import {
   CreditCard,
   FolderOpen,
   Shield,
+  User,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -33,7 +34,8 @@ const navItems = [
   { to: '/dashboard/transactions', icon: CreditCard, label: 'Transactions' },
   { to: '/dashboard/documents', icon: FolderOpen, label: 'Documents' },
   { to: '/dashboard/admin', icon: Shield, label: 'Admin' },
-  { to: '/dashboard/settings', icon: Settings, label: 'Settings' },
+  { to: '/dashboard/profile', icon: User, label: 'Profile' },
+  { to: '/dashboard/settings', icon: Settings, label: 'Profile & Settings' },
 ]
 
 export function Sidebar() {

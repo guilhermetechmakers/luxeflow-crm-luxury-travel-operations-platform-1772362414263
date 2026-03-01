@@ -326,42 +326,78 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-- Maintain a refined, modern luxury aesthetic with minimalism and subtle opulence.
-- Ensure clean, airy layouts with generous spacing and clear visual hierarchy.
-- Use the specified color palette:
-  - Primary: #FFFFFF
-  - Accent: #8A9A5B
-  - Neutrals: #F6F6F6, #EEEEEE
-  - Text: #222222, secondary #888888
-  - Soft Gold: #C6AB62
-- Typography:
-  - Headings: Playfair Display or Georgia
-  - Body/UI: Lato or Helvetica Neue
-- Card Design:
-  - White cards with subtle shadows, 4–8px radius, divider lines, hover lift.
-- Navigation:
-  - Sticky header with smooth transitions; responsive collapsible menu.
-- Interactive Elements:
-  - Buttons in Olive Green (#8A9A5B) with white text; focus/hover states; accessible controls.
-- Data Visualization:
-  - No heavy charts required; keep charts minimalist if used in other modules.
-- Accessibility:
-  - ARIA labels, keyboard navigability, and contrast considerations.
+- See Visual Style section below for color, typography, spacing, and interactive behaviors.
+- Use Card-based layouts with subtle shadows, rounded corners, and light dividers.
+- Ensure top navigation remains accessible with sticky header behavior and focus states.
+- Ensure responsive behavior: mobile nav, stacked sections, touch-friendly controls.
+- Use olive green accent for primary call-to-action buttons and key toggles.
+- Use serif headings (Playfair Display/Georgia) and sans-serif body text (Lato/Helvetica Neue).
+- Maintain generous whitespace, clear hierarchy, and restrained micro-interactions.
 
-## Mandatory Coding Standards — Runtime Safety
+Visual Style
 
-CRITICAL: Follow these rules in ALL generated code to prevent runtime crashes.
+Color Palette:
+- Primary: #FFFFFF
+- Accent: #8A9A5B
+- Neutrals: #F6F6F6, #EEEEEE
+- Text: #222222, #888888
+- Supporting: #C6AB62
+- Imagery: High-resolution warm-toned photography
 
-1. Supabase query results (if used): Always use nullish coalescing — const items = data ?? [].
-2. Array methods: Never call on a value that could be null/undefined. Guard with (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : [].
-3. React useState for arrays/objects: Initialize with correct type, e.g., useState<Resort[]>([]) and useState<string[]>([]) for IDs or tags.
-4. API response shapes: Validate — const list = Array.isArray(response?.data) ? response.data : [].
-5. Optional chaining: Use obj?.property?.nested when accessing nested API results.
-6. Destructuring with defaults: const { items = [], count = 0 } = response ?? {}.
+Typography & Layout:
+- Headings: Playfair Display or Georgia
+- Body: Lato or Helvetica Neue
+- Hierarchy: Large headlines, subtler subheads, readable body text
+- Spacing: Generous padding; clear separation between sections
+- Alignment: Left-aligned content; center-aligned headers for key callouts
+- Treatments: Uppercase for section labels; italic for quotes/testimonials (if used)
 
----
+Key Design Elements
+- Card Design: White cards, soft shadows, 4-8px radius
+- Dividers: Thin light gray lines
+- Hover States: Subtle shadow lift; accent border on selection
+- Visual Hierarchy: Top image or heading, then content sections
 
-This prompt provides a complete, actionable specification for AI development tooling to build the Resort Bible (Directory) feature with a strong emphasis on runtime safety, data integrity, and a premium user experience aligned to LuxeFlow’s design system. It covers frontend components, backend APIs, data models, integration points, UX flows, and acceptance criteria, ensuring a cohesive implementation that scales with the project’s broader CRM.
+Navigation
+- Top Nav: Centered/left-aligned logo; minimal menu with hover underline
+- Sticky Header: Visible on scroll with fade effect
+- Active States: Accent underline
+- Responsive: Mobile nav with hamburger menu
+
+Data Visualization
+- Not core to this page; use minimalist indicators if needed
+
+Interactive Elements
+- Buttons: Olive green, white text; bold padding; hover shadow
+- Forms: White inputs with thin borders; clear focus state
+- Dropdowns/Selects: Simple, accessible
+- Micro-interactions: Smooth transitions, restrained feedback
+
+Design Philosophy
+- Luxury, modern, minimalistic
+- Clarity, generous whitespace, calm professionalism
+- Premium feel with efficiency for power users
+
+Mandatory Coding Standards — Runtime Safety
+- Supabase/query results: data ?? [] (if using Supabase)
+- Array methods guarded: (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
+- React useState: useState<T[]>([]) for arrays; useState<{...} | null>(null) only where appropriate for single objects
+- API response shapes: const list = Array.isArray(response?.data) ? response.data : []
+- Optional chaining: obj?.property?.nested
+- Destructuring with defaults: const { items = [], count = 0 } = response ?? {}
+
+PROJECT CONTEXT
+TARGET PAGE: User Profile
+Description: Personal profile management page for avatar, contact info, password, 2FA, notification preferences, and API tokens; connected to Auth & Roles and User Management with Admin capabilities for user creation/editing, roles, SSO/SAML, permissions, and deactivation.
+
+Connected Pages/Features
+- User Management: Admin page for user CRUD, roles, SSO/SAML, permissions, deactivate
+- User Authentication & Roles: Secure signup/login, SSO, session management, and permissions enforcement
+
+Deliverable
+A complete, detailed prompt that an AI development tool can use to build this feature, including frontend components, backend APIs, data models, security requirements, and UI/UX guidelines, with runtime safety guarantees as outlined above.
+
+End of prompt.
 
 ## Implementation Notes
 

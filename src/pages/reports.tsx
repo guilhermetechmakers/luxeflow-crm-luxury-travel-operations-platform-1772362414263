@@ -27,12 +27,25 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BookOpen, Euro, Percent, TrendingUp, Filter } from 'lucide-react'
-import type { ReportingFilters, BreakdownType, DateRangePreset } from '@/types/reporting'
+import type {
+  ReportingFilters,
+  BreakdownType,
+  DateRangePreset,
+  CustomReportDefinition,
+} from '@/types/reporting'
 
 export function Reports() {
   const [datePreset, setDatePreset] = useState<DateRangePreset>('30d')
   const [filters, setFilters] = useState<ReportingFilters>(() => getDefaultReportingFilters())
   const [breakdownType, setBreakdownType] = useState<BreakdownType>('agent')
+
+  const handleCustomReportLoad = useCallback((def: CustomReportDefinition) => {
+    const newFilters = def.filters ?? getDefaultReportingFilters()
+    setFilters(newFilters)
+    const firstGrouping = (def.groupings ?? [])[0]
+    if (firstGrouping) setBreakdownType(firstGrouping)
+    setDatePreset('custom')
+  }, [])
 
   const { data: kpis, isLoading: kpisLoading } = useQuery({
     queryKey: ['reporting', 'kpis', filters],
@@ -133,7 +146,7 @@ export function Reports() {
               ))}
             </SelectContent>
           </Select>
-          <CustomReportBuilder filters={filters} />
+          <CustomReportBuilder filters={filters} onSave={handleCustomReportLoad} />
         </div>
       </div>
 

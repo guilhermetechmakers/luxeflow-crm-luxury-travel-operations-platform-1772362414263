@@ -2,7 +2,7 @@
  * DateRangePicker - Presets and custom range with validation
  * Presets: Last 7 days, 14 days, 30 days, YTD, Custom
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -67,6 +67,12 @@ export function DateRangePicker({
   const [customStart, setCustomStart] = useState(startDate)
   const [customEnd, setCustomEnd] = useState(endDate)
   const [activePreset, setActivePreset] = useState<DateRangePreset>(preset)
+
+  useEffect(() => {
+    setCustomStart(startDate)
+    setCustomEnd(endDate)
+    setActivePreset(preset)
+  }, [startDate, endDate, preset])
 
   const handlePresetSelect = (value: string) => {
     const p = value as DateRangePreset

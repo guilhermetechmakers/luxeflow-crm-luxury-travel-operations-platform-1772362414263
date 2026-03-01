@@ -128,7 +128,29 @@ export function BreakdownPanel({
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="overflow-x-auto">
+            {/* Mobile: card list */}
+            <div className="space-y-3 md:hidden" role="list">
+              {(list ?? []).map((item) => (
+                <div
+                  key={item.id}
+                  role="listitem"
+                  className="rounded-lg border border-border bg-muted/20 p-4 transition-colors hover:bg-muted/40"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{item.name}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {item.percentage != null ? `${item.percentage}%` : '—'}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex gap-4 text-sm">
+                    <span>€{(item.value ?? 0).toLocaleString('en-EU')}</span>
+                    <span>{item.count ?? 0} bookings</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop: table */}
+            <div className="hidden overflow-x-auto md:block">
               <Table>
                 <TableHeader>
                   <TableRow>
