@@ -138,3 +138,155 @@ export interface BulkExportResponse {
   url?: string
   status?: string
 }
+
+// --- Booking Detail (full lifecycle-aware record) ---
+
+export type TimelineStageType =
+  | 'quote'
+  | 'confirmed'
+  | 'pre_arrival'
+  | 'in_stay'
+  | 'post_stay'
+
+export interface TimelineStage {
+  id: string
+  booking_id: string
+  stage: TimelineStageType
+  timestamp: string
+  actor_id?: string
+  actor_name?: string
+  note?: string
+}
+
+export interface ItineraryItem {
+  id: string
+  type: 'activity' | 'transfer'
+  title: string
+  description?: string
+  time?: string
+  location?: string
+}
+
+export interface ItineraryDay {
+  id: string
+  day_index: number
+  date: string
+  activities: ItineraryItem[]
+  transfers: ItineraryItem[]
+}
+
+export interface RatePlan {
+  id: string
+  name: string
+  amount: number
+  currency: string
+  taxes?: number
+  fees?: number
+  discount?: number
+}
+
+export type CommissionModelType = 'percentage' | 'fixed' | 'tiered'
+
+export interface CommissionModel {
+  type: CommissionModelType
+  value: number
+  calculated_commission: number
+  supplier_net: number
+}
+
+export interface PaymentMilestone {
+  id: string
+  booking_id: string
+  milestone: string
+  due_date: string
+  amount: number
+  currency: string
+  status: 'paid' | 'unpaid' | 'overdue'
+  paid_at?: string
+  payment_link?: string
+}
+
+export interface AttachmentDetail {
+  id: string
+  booking_id: string
+  filename: string
+  url: string
+  type: string
+  uploaded_at: string
+  uploaded_by?: string
+  version?: number
+}
+
+export interface NoteDetail {
+  id: string
+  booking_id: string
+  author_id: string
+  author_name?: string
+  content: string
+  created_at: string
+  tags?: string[]
+}
+
+export interface ApprovalDetail {
+  id: string
+  booking_id: string
+  requester_id: string
+  requester_name?: string
+  status: 'pending' | 'approved' | 'denied'
+  due_by?: string
+  history?: { timestamp: string; actor: string; action: string }[]
+}
+
+export interface SupplierReferenceDetail {
+  id: string
+  booking_id: string
+  supplier_id: string
+  supplier_name?: string
+  reference_numbers?: string
+  contact?: string
+  contract_attachments?: string[]
+}
+
+export interface ClientRef {
+  id: string
+  name: string
+  avatar_url?: string
+}
+
+export interface ResortRef {
+  id: string
+  name: string
+  location?: string
+}
+
+export interface RoomCategoryRef {
+  id: string
+  name: string
+}
+
+export interface BookingDetail {
+  id: string
+  reference: string
+  client_id: string
+  client?: ClientRef
+  resort_id: string
+  resort?: ResortRef
+  room_category_id?: string
+  room_category?: RoomCategoryRef
+  status: BookingStatus
+  check_in: string
+  check_out: string
+  total_amount: number
+  outstanding_balance: number
+  currency: string
+  timeline?: TimelineStage[]
+  itinerary?: ItineraryDay[]
+  rates?: RatePlan[]
+  commission?: CommissionModel
+  payments?: PaymentMilestone[]
+  supplier_references?: SupplierReferenceDetail[]
+  attachments?: AttachmentDetail[]
+  notes?: NoteDetail[]
+  approvals?: ApprovalDetail[]
+  deadlines?: { id: string; title: string; due_date: string; type: string }[]
+}

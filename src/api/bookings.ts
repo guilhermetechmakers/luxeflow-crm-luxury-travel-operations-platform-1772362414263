@@ -14,6 +14,14 @@ import type {
   Agent,
   Resort,
   BookingStatus,
+  BookingDetail,
+  TimelineStage,
+  ItineraryDay,
+  PaymentMilestone,
+  AttachmentDetail,
+  NoteDetail,
+  ApprovalDetail,
+  SupplierReferenceDetail,
 } from '@/types/booking'
 
 const MOCK_AGENTS: Agent[] = [
@@ -339,4 +347,258 @@ export const bookingsApi = {
       return { success: false }
     }
   },
+
+  /**
+   * GET /api/bookings/:id - Full BookingDetail payload
+   */
+  async getBookingDetail(id: string): Promise<BookingDetail | null> {
+    try {
+      const res = await api.get<BookingDetail>(`/bookings/${id}`)
+      return res ?? null
+    } catch {
+      return buildMockBookingDetail(id)
+    }
+  },
+
+  /**
+   * PUT /api/bookings/:id - Partial field updates
+   */
+  async updateBooking(id: string, updates: Record<string, unknown>): Promise<BookingDetail | null> {
+    try {
+      const res = await api.put<BookingDetail>(`/bookings/${id}`, updates)
+      return res ?? null
+    } catch {
+      const detail = buildMockBookingDetail(id)
+      return detail ? { ...detail, ...updates } as BookingDetail : null
+    }
+  },
+
+  /**
+   * POST /api/bookings/:id/attachments
+   */
+  async addAttachment(id: string, file: { filename: string; url: string; type: string }): Promise<AttachmentDetail | null> {
+    try {
+      const res = await api.post<AttachmentDetail>(`/bookings/${id}/attachments`, file)
+      return res ?? null
+    } catch {
+      return {
+        id: `att-${Date.now()}`,
+        booking_id: id,
+        filename: file.filename,
+        url: file.url,
+        type: file.type,
+        uploaded_at: new Date().toISOString(),
+      }
+    }
+  },
+
+  /**
+   * POST /api/bookings/:id/notes
+   */
+  async addNote(id: string, content: string): Promise<NoteDetail | null> {
+    try {
+      const res = await api.post<NoteDetail>(`/bookings/${id}/notes`, { content })
+      return res ?? null
+    } catch {
+      return {
+        id: `note-${Date.now()}`,
+        booking_id: id,
+        author_id: 'current',
+        author_name: 'Current User',
+        content,
+        created_at: new Date().toISOString(),
+      }
+    }
+  },
+
+  /**
+   * POST /api/bookings/:id/tasks
+   */
+  async createTask(id: string, task: { title: string; due_date?: string; assignee_id?: string }): Promise<{ success: boolean }> {
+    try {
+      await api.post(`/bookings/${id}/tasks`, task)
+      return { success: true }
+    } catch {
+      return { success: true }
+    }
+  },
+
+  /**
+   * POST /api/bookings/:id/approvals
+   */
+  async requestApproval(id: string, payload?: { approver_id?: string }): Promise<ApprovalDetail | null> {
+    try {
+      const res = await api.post<ApprovalDetail>(`/bookings/${id}/approvals`, payload ?? {})
+      return res ?? null
+    } catch {
+      return {
+        id: `apr-${Date.now()}`,
+        booking_id: id,
+        requester_id: 'current',
+        requester_name: 'Current User',
+        status: 'pending',
+        due_by: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      }
+    }
+  },
+
+  /**
+   * GET /api/bookings/:id/payments
+   */
+  async getPayments(id: string): Promise<PaymentMilestone[]> {
+    try {
+      const res = await api.get<PaymentMilestone[] | { data?: PaymentMilestone[] }>(`/bookings/${id}/payments`)
+      const list = Array.isArray(res) ? res : Array.isArray((res as { data?: PaymentMilestone[] })?.data) ? (res as { data: PaymentMilestone[] }).data : []
+      return list ?? []
+    } catch {
+      const detail = buildMockBookingDetail(id)
+      return detail?.payments ?? []
+    }
+  },
+
+  /**
+   * POST /api/bookings/:id/payments
+   */
+  async createPayment(id: string, milestone: { milestone: string; due_date: string; amount: number; currency: string }): Promise<PaymentMilestone | null> {
+    try {
+      const res = await api.post<PaymentMilestone>(`/bookings/${id}/payments`, milestone)
+      return res ?? null
+    } catch {
+      return {
+        id: `pay-${Date.now()}`,
+        booking_id: id,
+        milestone: milestone.milestone,
+        due_date: milestone.due_date,
+        amount: milestone.amount,
+        currency: milestone.currency,
+        status: 'unpaid',
+      }
+    }
+  },
+
+  /**
+   * GET /api/bookings/:id/suppliers
+   */
+  async getSuppliers(id: string): Promise<SupplierReferenceDetail[]> {
+    try {
+      const res = await api.get<SupplierReferenceDetail[] | { data?: SupplierReferenceDetail[] }>(`/bookings/${id}/suppliers`)
+      const list = Array.isArray(res) ? res : Array.isArray((res as { data?: SupplierReferenceDetail[] })?.data) ? (res as { data: SupplierReferenceDetail[] }).data : []
+      return list ?? []
+    } catch {
+      const detail = buildMockBookingDetail(id)
+      return detail?.supplier_references ?? []
+    }
+  },
+
+  /**
+   * GET /api/bookings/:id/itinerary
+   */
+  async getItinerary(id: string): Promise<ItineraryDay[]> {
+    try {
+      const res = await api.get<ItineraryDay[] | { data?: ItineraryDay[] }>(`/bookings/${id}/itinerary`)
+      const list = Array.isArray(res) ? res : Array.isArray((res as { data?: ItineraryDay[] })?.data) ? (res as { data: ItineraryDay[] }).data : []
+      return list ?? []
+    } catch {
+      const detail = buildMockBookingDetail(id)
+      return detail?.itinerary ?? []
+    }
+  },
+
+  /**
+   * PUT /api/bookings/:id/timeline - Update stage date
+   */
+  async updateTimelineStage(id: string, stageId: string, timestamp: string): Promise<TimelineStage | null> {
+    try {
+      const res = await api.put<TimelineStage>(`/bookings/${id}/timeline/${stageId}`, { timestamp })
+      return res ?? null
+    } catch {
+      return null
+    }
+  },
+}
+
+/** Build mock BookingDetail for local dev when API unavailable */
+function buildMockBookingDetail(id: string): BookingDetail | null {
+  const summary = (MOCK_BOOKINGS ?? []).find((b) => b.id === id)
+  if (!summary) return null
+
+  const timeline: TimelineStage[] = [
+    { id: 't1', booking_id: id, stage: 'quote', timestamp: '2025-02-20T10:00:00Z', actor_name: 'Sarah Mitchell' },
+    { id: 't2', booking_id: id, stage: 'confirmed', timestamp: '2025-02-25T14:00:00Z', actor_name: 'Sarah Mitchell' },
+    { id: 't3', booking_id: id, stage: 'pre_arrival', timestamp: '2025-02-28T09:00:00Z', actor_name: 'James Chen' },
+  ]
+
+  const itinerary: ItineraryDay[] = [
+    {
+      id: 'i1',
+      day_index: 1,
+      date: summary.check_in,
+      activities: [
+        { id: 'a1', type: 'activity', title: 'Arrival & Check-in', time: '14:00', location: summary.resort_name },
+      ],
+      transfers: [
+        { id: 'tr1', type: 'transfer', title: 'Airport to Resort', time: '12:00', description: 'Private car' },
+      ],
+    },
+    {
+      id: 'i2',
+      day_index: 2,
+      date: '2025-03-16',
+      activities: [
+        { id: 'a2', type: 'activity', title: 'Spa Day', time: '10:00' },
+        { id: 'a3', type: 'activity', title: 'Dinner at La Terrazza', time: '19:30' },
+      ],
+      transfers: [],
+    },
+  ]
+
+  const payments: PaymentMilestone[] = [
+    { id: 'p1', booking_id: id, milestone: 'Deposit', due_date: '2025-03-01', amount: 6200, currency: summary.currency, status: summary.balance_due > 0 ? 'unpaid' : 'paid', paid_at: summary.balance_due === 0 ? '2025-02-28' : undefined },
+    { id: 'p2', booking_id: id, milestone: 'Balance', due_date: '2025-03-10', amount: summary.value - 6200, currency: summary.currency, status: summary.balance_due > 0 ? 'unpaid' : 'paid' },
+  ]
+
+  const attachments: AttachmentDetail[] = [
+    { id: 'att1', booking_id: id, filename: 'contract.pdf', url: '#', type: 'contract', uploaded_at: '2025-02-25T10:00:00Z', uploaded_by: 'Sarah Mitchell' },
+  ]
+
+  const notes: NoteDetail[] = [
+    { id: 'n1', booking_id: id, author_id: 'a1', author_name: 'Sarah Mitchell', content: 'Client prefers early check-in if possible.', created_at: '2025-02-26T11:00:00Z' },
+  ]
+
+  const approvals: ApprovalDetail[] = summary.status === 'quote' ? [
+    { id: 'apr1', booking_id: id, requester_id: 'a1', requester_name: 'Sarah Mitchell', status: 'pending', due_by: '2025-03-05T17:00:00Z' },
+  ] : []
+
+  const supplierRefs: SupplierReferenceDetail[] = [
+    { id: 's1', booking_id: id, supplier_id: 'sup1', supplier_name: 'Villa Serenity Management', reference_numbers: 'VS-2025-001', contact: 'reservations@villaserenity.com' },
+  ]
+
+  return {
+    id: summary.id,
+    reference: summary.booking_ref,
+    client_id: summary.client_id,
+    client: { id: summary.client_id, name: summary.client_name },
+    resort_id: summary.resort_id,
+    resort: { id: summary.resort_id, name: summary.resort_name, location: (MOCK_RESORTS ?? []).find((r) => r.id === summary.resort_id)?.location },
+    status: summary.status,
+    check_in: summary.check_in,
+    check_out: summary.check_out,
+    total_amount: summary.value,
+    outstanding_balance: summary.balance_due,
+    currency: summary.currency,
+    timeline,
+    itinerary,
+    rates: [
+      { id: 'r1', name: 'Deluxe Suite', amount: summary.value, currency: summary.currency, taxes: summary.value * 0.1, fees: 0, discount: 0 },
+    ],
+    commission: { type: 'percentage', value: 10, calculated_commission: summary.commission, supplier_net: summary.value - summary.commission },
+    payments,
+    supplier_references: supplierRefs,
+    attachments,
+    notes,
+    approvals,
+    deadlines: [
+      { id: 'd1', title: 'Final payment due', due_date: '2025-03-10', type: 'payment' },
+    ],
+  }
 }
