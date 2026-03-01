@@ -14,7 +14,12 @@ export { ResortDetailPreviewModal } from './resort-detail-preview-modal'
 export { ResortDetailLink } from './resort-detail-link'
 export { MediaGallery } from './media-gallery'
 export { InternalRatingsPanel } from './internal-ratings-panel'
+export { InternalNotesPanel } from './internal-notes-panel'
 export { PartnerBadges } from './partner-badges'
+export { ResortHeader } from './resort-header'
+export { ResortRoomsTable } from './resort-rooms-table'
+export { ResortPoliciesPanel } from './resort-policies-panel'
+export { ContactsList } from './contacts-list'
 export {
   DebouncedSearchInput,
   RatingStars,
