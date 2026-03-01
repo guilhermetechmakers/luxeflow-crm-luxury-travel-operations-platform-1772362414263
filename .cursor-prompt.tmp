@@ -1,0 +1,1512 @@
+⚠️ CRITICAL EXECUTION RULES - READ FIRST ⚠️
+❌ NEVER run: npm run dev, npm start, yarn dev, pnpm dev, or ANY development server
+❌ NEVER run: long-running processes, servers, or commands that don't exit
+❌ NEVER test the application by starting it
+✅ ALLOWED: npm install, npm run build, npm run test (if needed)
+✅ YOUR TASK: Create/modify files only, then STOP and EXIT immediately
+⚠️ The MCP server handles all testing and validation separately
+
+You are an expert full-stack developer proficient in TypeScript, React, Next.js, and modern UI/UX frameworks (Tailwind CSS, Shadcn UI, Radix UI).
+
+=== DESIGN REFERENCE (MANDATORY) ===
+# Modern Design Best Practices
+
+## Philosophy
+
+Create unique, memorable experiences while maintaining consistency through modern design principles. Every project should feel distinct yet professional, innovative yet intuitive.
+
+---
+
+## Landing Pages & Marketing Sites
+
+### Hero Sections
+**Go beyond static backgrounds:**
+- Animated gradients with subtle movement
+- Particle systems or geometric shapes floating
+- Interactive canvas backgrounds (Three.js, WebGL)
+- Video backgrounds with proper fallbacks
+- Parallax scrolling effects
+- Gradient mesh animations
+- Morphing blob animations
+
+
+### Layout Patterns
+**Use modern grid systems:**
+- Bento grids (asymmetric card layouts)
+- Masonry layouts for varied content
+- Feature sections with diagonal cuts or curves
+- Overlapping elements with proper z-index
+- Split-screen designs with scroll-triggered reveals
+
+**Avoid:** Traditional 3-column equal grids
+
+### Scroll Animations
+**Engage users as they scroll:**
+- Fade-in and slide-up animations for sections
+- Scroll-triggered parallax effects
+- Progress indicators for long pages
+- Sticky elements that transform on scroll
+- Horizontal scroll sections for portfolios
+- Text reveal animations (word by word, letter by letter)
+- Number counters animating into view
+
+**Avoid:** Static pages with no scroll interaction
+
+### Call-to-Action Areas
+**Make CTAs impossible to miss:**
+- Gradient buttons with hover effects
+- Floating action buttons with micro-interactions
+- Animated borders or glowing effects
+- Scale/lift on hover
+- Interactive elements that respond to mouse position
+- Pulsing indicators for primary actions
+
+---
+
+## Dashboard Applications
+
+### Layout Structure
+**Always use collapsible side navigation:**
+- Sidebar that can collapse to icons only
+- Smooth transition animations between states
+- Persistent navigation state (remember user preference)
+- Mobile: drawer that slides in/out
+- Desktop: sidebar with expand/collapse toggle
+- Icons visible even when collapsed
+
+**Structure:**
+```
+/dashboard (layout wrapper with sidebar)
+  /dashboard/overview
+  /dashboard/analytics
+  /dashboard/settings
+  /dashboard/users
+  /dashboard/projects
+```
+
+All dashboard pages should be nested inside the dashboard layout, not separate routes.
+
+### Data Tables
+**Modern table design:**
+- Sticky headers on scroll
+- Row hover states with subtle elevation
+- Sortable columns with clear indicators
+- Pagination with items-per-page control
+- Search/filter with instant feedback
+- Selection checkboxes with bulk actions
+- Responsive: cards on mobile, table on desktop
+- Loading skeletons, not spinners
+- Empty states with illustrations or helpful text
+
+**Use modern table libraries:**
+- TanStack Table (React Table v8)
+- AG Grid for complex data
+- Data Grid from MUI (if using MUI)
+
+### Charts & Visualizations
+**Use the latest charting libraries:**
+- Recharts (for React, simple charts)
+- Chart.js v4 (versatile, well-maintained)
+- Apache ECharts (advanced, interactive)
+- D3.js (custom, complex visualizations)
+- Tremor (for dashboards, built on Recharts)
+
+**Chart best practices:**
+- Animated transitions when data changes
+- Interactive tooltips with detailed info
+- Responsive sizing
+- Color scheme matching design system
+- Legend placement that doesn't obstruct data
+- Loading states while fetching data
+
+### Dashboard Cards
+**Metric cards should stand out:**
+- Gradient backgrounds or colored accents
+- Trend indicators (↑ ↓ with color coding)
+- Sparkline charts for historical data
+- Hover effects revealing more detail
+- Icon representing the metric
+- Comparison to previous period
+
+---
+
+## Color & Visual Design
+
+### Color Palettes
+**Create depth with gradients:**
+- Primary gradient (not just solid primary color)
+- Subtle background gradients
+- Gradient text for headings
+- Gradient borders on cards
+- Elevated surfaces for depth
+
+**Color usage:**
+- 60-30-10 rule (dominant, secondary, accent)
+- Consistent semantic colors (success, warning, error)
+- Accessible contrast ratios (WCAG AA minimum)
+
+### Typography
+**Create hierarchy through contrast:**
+- Large, bold headings (48-72px for heroes)
+- Clear size differences between levels
+- Variable font weights (300, 400, 600, 700)
+- Letter spacing for small caps
+- Line height 1.5-1.7 for body text
+- Inter, Poppins, or DM Sans for modern feel
+
+### Shadows & Depth
+**Layer UI elements:**
+- Multi-layer shadows for realistic depth
+- Colored shadows matching element color
+- Elevated states on hover
+- Neumorphism for special elements (sparingly)
+
+---
+
+## Interactions & Micro-animations
+
+### Button Interactions
+**Every button should react:**
+- Scale slightly on hover (1.02-1.05)
+- Lift with shadow on hover
+- Ripple effect on click
+- Loading state with spinner or progress
+- Disabled state clearly visible
+- Success state with checkmark animation
+
+### Card Interactions
+**Make cards feel alive:**
+- Lift on hover with increased shadow
+- Subtle border glow on hover
+- Tilt effect following mouse (3D transform)
+- Smooth transitions (200-300ms)
+- Click feedback for interactive cards
+
+### Form Interactions
+**Guide users through forms:**
+- Input focus states with border color change
+- Floating labels that animate up
+- Real-time validation with inline messages
+- Success checkmarks for valid inputs
+- Error states with shake animation
+- Password strength indicators
+- Character count for text areas
+
+### Page Transitions
+**Smooth between views:**
+- Fade + slide for page changes
+- Skeleton loaders during data fetch
+- Optimistic UI updates
+- Stagger animations for lists
+- Route transition animations
+
+---
+
+## Mobile Responsiveness
+
+### Mobile-First Approach
+**Design for mobile, enhance for desktop:**
+- Touch targets minimum 44x44px
+- Generous padding and spacing
+- Sticky bottom navigation on mobile
+- Collapsible sections for long content
+- Swipeable cards and galleries
+- Pull-to-refresh where appropriate
+
+### Responsive Patterns
+**Adapt layouts intelligently:**
+- Hamburger menu → full nav bar
+- Card grid → stack on mobile
+- Sidebar → drawer
+- Multi-column → single column
+- Data tables → card list
+- Hide/show elements based on viewport
+
+---
+
+## Loading & Empty States
+
+### Loading States
+**Never leave users wondering:**
+- Skeleton screens matching content layout
+- Progress bars for known durations
+- Animated placeholders
+- Spinners only for short waits (<3s)
+- Stagger loading for multiple elements
+- Shimmer effects on skeletons
+
+### Empty States
+**Make empty states helpful:**
+- Illustrations or icons
+- Helpful copy explaining why it's empty
+- Clear CTA to add first item
+- Examples or suggestions
+- No "no data" text alone
+
+---
+
+## Unique Elements to Stand Out
+
+### Distinctive Features
+**Add personality:**
+- Custom cursor effects on landing pages
+- Animated page numbers or section indicators
+- Unusual hover effects (magnification, distortion)
+- Custom scrollbars
+- Glassmorphism for overlays
+- Animated SVG icons
+- Typewriter effects for hero text
+- Confetti or celebration animations for actions
+
+### Interactive Elements
+**Engage users:**
+- Drag-and-drop interfaces
+- Sliders and range controls
+- Toggle switches with animations
+- Progress steps with animations
+- Expandable/collapsible sections
+- Tabs with slide indicators
+- Image comparison sliders
+- Interactive demos or playgrounds
+
+---
+
+## Consistency Rules
+
+### Maintain Consistency
+**What should stay consistent:**
+- Spacing scale (4px, 8px, 16px, 24px, 32px, 48px, 64px)
+- Border radius values
+- Animation timing (200ms, 300ms, 500ms)
+- Color system (primary, secondary, accent, neutrals)
+- Typography scale
+- Icon style (outline vs filled)
+- Button styles across the app
+- Form element styles
+
+### What Can Vary
+**Project-specific customization:**
+- Color palette (different colors, same system)
+- Layout creativity (grids, asymmetry)
+- Illustration style
+- Animation personality
+- Feature-specific interactions
+- Hero section design
+- Card styling variations
+- Background patterns or textures
+
+---
+
+## Technical Excellence
+
+### Performance
+- Optimize images (WebP, lazy loading)
+- Code splitting for faster loads
+- Debounce search inputs
+- Virtualize long lists
+- Minimize re-renders
+- Use proper memoization
+
+### Accessibility
+- Keyboard navigation throughout
+- ARIA labels where needed
+- Focus indicators visible
+- Screen reader friendly
+- Sufficient color contrast
+- Respect reduced motion preferences
+
+---
+
+## Key Principles
+
+1. **Be Bold** - Don't be afraid to try unique layouts and interactions
+2. **Be Consistent** - Use the same patterns for similar functions
+3. **Be Responsive** - Design works beautifully on all devices
+4. **Be Fast** - Animations are smooth, loading is quick
+5. **Be Accessible** - Everyone can use what you build
+6. **Be Modern** - Use current design trends and technologies
+7. **Be Unique** - Each project should have its own personality
+8. **Be Intuitive** - Users shouldn't need instructions
+
+
+---
+
+# Project-Specific Customizations
+
+**IMPORTANT: This section contains the specific design requirements for THIS project. The guidelines above are universal best practices - these customizations below take precedence for project-specific decisions.**
+
+## User Design Requirements
+
+- Maintain premium visuals, generous whitespace, and a calm, trustworthy interface.
+- Ensure visual hierarchy supports quick user comprehension during the reset flow.
+- Keep interactions smooth with subtle hover/focus transitions and consistent button states.
+
+Color Palette, Typography, and Layout
+- Follow the specified LuxeFlow color tokens and typography.
+- Cards with subtle shadows (rgba(34,34,34,0.07)), 4-8px border radius.
+- Accent actions in olive green (#8A9A5B); backgrounds in white (#FFFFFF) and neutrals (#F6F6F6, #EEEEEE).
+- High-contrast text (#222222) with secondary text in #888888.
+
+Mandatory Coding Standards — Runtime Safety
+CRITICAL: Implement all runtime safety rules in the generated code:
+1) Supabase-like results handling:
+   - const items = data ?? []
+2) Array methods safety:
+   - (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
+3) useState defaults for arrays/objects:
+   - useState<Type[]>([])
+4) API response shapes:
+   - const list = Array.isArray(response?.data) ? response.data : []
+5) Optional chaining:
+   - obj?.property?.nested
+6) Destructuring with defaults:
+   - const { items = [], count = 0 } = response ?? {}
+
+Project Context Integration
+- This feature integrates with: Auth + Roles (Admin, Agent, Ops, Finance), Sign-up, Login, SSO, and session management.
+- Connected pages: Login Page with secure login and SSO options; ensure seamless navigation between Login, Sign Up, and Password Reset.
+- Ensure consistent design language and components across pages for a cohesive UX.
+
+Deliverables
+- Complete React TypeScript components for Password Reset Request, Password Reset with token, TokenStatusBanner, and supportive UI elements.
+- API service layer with typed request/response contracts, including proper error handling and null safety.
+- Tests (unit/integration) covering:
+  - Email validation and error paths.
+  - Token parsing and validation paths (valid, invalid, expired).
+  - Password strength and matching logic.
+  - Safe handling of API responses with potential null data.
+- Documentation:
+  - API contracts summary.
+  - Data model notes for PasswordResetToken and related flows.
+  - Deployment considerations for security and performance (rate limiting, token expiry windows, etc.).
+
+Notes for AI Development Tool
+- Leverage existing design tokens and component library if present; otherwise implement lightweight, accessible equivalents aligned to LuxeFlow style.
+- Ensure code is modular, reusable, and easy to extend (e.g., if email templates or token strategies evolve).
+- Include robust error handling and graceful fallbacks to satisfy the runtime safety requirements.
+- Provide clear comments explaining security decisions and data flow, especially around token handling and password updates.
+
+If you need, I can produce a ready-to-run code scaffold (TypeScript React) with the components, API service stubs, and example tests that adhere to the above standards.
+
+## Implementation Notes
+
+When implementing this project:
+
+1. **Follow Universal Guidelines**: Use the design best practices documented above as your foundation
+2. **Apply Project Customizations**: Implement the specific design requirements stated in the "User Design Requirements" section
+3. **Priority Order**: Project-specific requirements override universal guidelines when there's a conflict
+4. **Color System**: Extract and implement color values as CSS custom properties in RGB format
+5. **Typography**: Define font families, sizes, and weights based on specifications
+6. **Spacing**: Establish consistent spacing scale following the design system
+7. **Components**: Style all Shadcn components to match the design aesthetic
+8. **Animations**: Use Motion library for transitions matching the design personality
+9. **Responsive Design**: Ensure mobile-first responsive implementation
+
+## Implementation Checklist
+
+- [ ] Review universal design guidelines above
+- [ ] Extract project-specific color palette and define CSS variables
+- [ ] Configure Tailwind theme with custom colors
+- [ ] Set up typography system (fonts, sizes, weights)
+- [ ] Define spacing and sizing scales
+- [ ] Create component variants matching design
+- [ ] Implement responsive breakpoints
+- [ ] Add animations and transitions
+- [ ] Ensure accessibility standards
+- [ ] Validate against user design requirements
+
+---
+
+**Remember: Always reference this file for design decisions. Do not use generic or placeholder designs.**
+
+
+*IMPORTANT*: For every page or component refer to # Modern Design Best Practices
+
+## Philosophy
+
+Create unique, memorable experiences while maintaining consistency through modern design principles. Every project should feel distinct yet professional, innovative yet intuitive.
+
+---
+
+## Landing Pages & Marketing Sites
+
+### Hero Sections
+**Go beyond static backgrounds:**
+- Animated gradients with subtle movement
+- Particle systems or geometric shapes floating
+- Interactive canvas backgrounds (Three.js, WebGL)
+- Video backgrounds with proper fallbacks
+- Parallax scrolling effects
+- Gradient mesh animations
+- Morphing blob animations
+
+
+### Layout Patterns
+**Use modern grid systems:**
+- Bento grids (asymmetric card layouts)
+- Masonry layouts for varied content
+- Feature sections with diagonal cuts or curves
+- Overlapping elements with proper z-index
+- Split-screen designs with scroll-triggered reveals
+
+**Avoid:** Traditional 3-column equal grids
+
+### Scroll Animations
+**Engage users as they scroll:**
+- Fade-in and slide-up animations for sections
+- Scroll-triggered parallax effects
+- Progress indicators for long pages
+- Sticky elements that transform on scroll
+- Horizontal scroll sections for portfolios
+- Text reveal animations (word by word, letter by letter)
+- Number counters animating into view
+
+**Avoid:** Static pages with no scroll interaction
+
+### Call-to-Action Areas
+**Make CTAs impossible to miss:**
+- Gradient buttons with hover effects
+- Floating action buttons with micro-interactions
+- Animated borders or glowing effects
+- Scale/lift on hover
+- Interactive elements that respond to mouse position
+- Pulsing indicators for primary actions
+
+---
+
+## Dashboard Applications
+
+### Layout Structure
+**Always use collapsible side navigation:**
+- Sidebar that can collapse to icons only
+- Smooth transition animations between states
+- Persistent navigation state (remember user preference)
+- Mobile: drawer that slides in/out
+- Desktop: sidebar with expand/collapse toggle
+- Icons visible even when collapsed
+
+**Structure:**
+```
+/dashboard (layout wrapper with sidebar)
+  /dashboard/overview
+  /dashboard/analytics
+  /dashboard/settings
+  /dashboard/users
+  /dashboard/projects
+```
+
+All dashboard pages should be nested inside the dashboard layout, not separate routes.
+
+### Data Tables
+**Modern table design:**
+- Sticky headers on scroll
+- Row hover states with subtle elevation
+- Sortable columns with clear indicators
+- Pagination with items-per-page control
+- Search/filter with instant feedback
+- Selection checkboxes with bulk actions
+- Responsive: cards on mobile, table on desktop
+- Loading skeletons, not spinners
+- Empty states with illustrations or helpful text
+
+**Use modern table libraries:**
+- TanStack Table (React Table v8)
+- AG Grid for complex data
+- Data Grid from MUI (if using MUI)
+
+### Charts & Visualizations
+**Use the latest charting libraries:**
+- Recharts (for React, simple charts)
+- Chart.js v4 (versatile, well-maintained)
+- Apache ECharts (advanced, interactive)
+- D3.js (custom, complex visualizations)
+- Tremor (for dashboards, built on Recharts)
+
+**Chart best practices:**
+- Animated transitions when data changes
+- Interactive tooltips with detailed info
+- Responsive sizing
+- Color scheme matching design system
+- Legend placement that doesn't obstruct data
+- Loading states while fetching data
+
+### Dashboard Cards
+**Metric cards should stand out:**
+- Gradient backgrounds or colored accents
+- Trend indicators (↑ ↓ with color coding)
+- Sparkline charts for historical data
+- Hover effects revealing more detail
+- Icon representing the metric
+- Comparison to previous period
+
+---
+
+## Color & Visual Design
+
+### Color Palettes
+**Create depth with gradients:**
+- Primary gradient (not just solid primary color)
+- Subtle background gradients
+- Gradient text for headings
+- Gradient borders on cards
+- Elevated surfaces for depth
+
+**Color usage:**
+- 60-30-10 rule (dominant, secondary, accent)
+- Consistent semantic colors (success, warning, error)
+- Accessible contrast ratios (WCAG AA minimum)
+
+### Typography
+**Create hierarchy through contrast:**
+- Large, bold headings (48-72px for heroes)
+- Clear size differences between levels
+- Variable font weights (300, 400, 600, 700)
+- Letter spacing for small caps
+- Line height 1.5-1.7 for body text
+- Inter, Poppins, or DM Sans for modern feel
+
+### Shadows & Depth
+**Layer UI elements:**
+- Multi-layer shadows for realistic depth
+- Colored shadows matching element color
+- Elevated states on hover
+- Neumorphism for special elements (sparingly)
+
+---
+
+## Interactions & Micro-animations
+
+### Button Interactions
+**Every button should react:**
+- Scale slightly on hover (1.02-1.05)
+- Lift with shadow on hover
+- Ripple effect on click
+- Loading state with spinner or progress
+- Disabled state clearly visible
+- Success state with checkmark animation
+
+### Card Interactions
+**Make cards feel alive:**
+- Lift on hover with increased shadow
+- Subtle border glow on hover
+- Tilt effect following mouse (3D transform)
+- Smooth transitions (200-300ms)
+- Click feedback for interactive cards
+
+### Form Interactions
+**Guide users through forms:**
+- Input focus states with border color change
+- Floating labels that animate up
+- Real-time validation with inline messages
+- Success checkmarks for valid inputs
+- Error states with shake animation
+- Password strength indicators
+- Character count for text areas
+
+### Page Transitions
+**Smooth between views:**
+- Fade + slide for page changes
+- Skeleton loaders during data fetch
+- Optimistic UI updates
+- Stagger animations for lists
+- Route transition animations
+
+---
+
+## Mobile Responsiveness
+
+### Mobile-First Approach
+**Design for mobile, enhance for desktop:**
+- Touch targets minimum 44x44px
+- Generous padding and spacing
+- Sticky bottom navigation on mobile
+- Collapsible sections for long content
+- Swipeable cards and galleries
+- Pull-to-refresh where appropriate
+
+### Responsive Patterns
+**Adapt layouts intelligently:**
+- Hamburger menu → full nav bar
+- Card grid → stack on mobile
+- Sidebar → drawer
+- Multi-column → single column
+- Data tables → card list
+- Hide/show elements based on viewport
+
+---
+
+## Loading & Empty States
+
+### Loading States
+**Never leave users wondering:**
+- Skeleton screens matching content layout
+- Progress bars for known durations
+- Animated placeholders
+- Spinners only for short waits (<3s)
+- Stagger loading for multiple elements
+- Shimmer effects on skeletons
+
+### Empty States
+**Make empty states helpful:**
+- Illustrations or icons
+- Helpful copy explaining why it's empty
+- Clear CTA to add first item
+- Examples or suggestions
+- No "no data" text alone
+
+---
+
+## Unique Elements to Stand Out
+
+### Distinctive Features
+**Add personality:**
+- Custom cursor effects on landing pages
+- Animated page numbers or section indicators
+- Unusual hover effects (magnification, distortion)
+- Custom scrollbars
+- Glassmorphism for overlays
+- Animated SVG icons
+- Typewriter effects for hero text
+- Confetti or celebration animations for actions
+
+### Interactive Elements
+**Engage users:**
+- Drag-and-drop interfaces
+- Sliders and range controls
+- Toggle switches with animations
+- Progress steps with animations
+- Expandable/collapsible sections
+- Tabs with slide indicators
+- Image comparison sliders
+- Interactive demos or playgrounds
+
+---
+
+## Consistency Rules
+
+### Maintain Consistency
+**What should stay consistent:**
+- Spacing scale (4px, 8px, 16px, 24px, 32px, 48px, 64px)
+- Border radius values
+- Animation timing (200ms, 300ms, 500ms)
+- Color system (primary, secondary, accent, neutrals)
+- Typography scale
+- Icon style (outline vs filled)
+- Button styles across the app
+- Form element styles
+
+### What Can Vary
+**Project-specific customization:**
+- Color palette (different colors, same system)
+- Layout creativity (grids, asymmetry)
+- Illustration style
+- Animation personality
+- Feature-specific interactions
+- Hero section design
+- Card styling variations
+- Background patterns or textures
+
+---
+
+## Technical Excellence
+
+### Performance
+- Optimize images (WebP, lazy loading)
+- Code splitting for faster loads
+- Debounce search inputs
+- Virtualize long lists
+- Minimize re-renders
+- Use proper memoization
+
+### Accessibility
+- Keyboard navigation throughout
+- ARIA labels where needed
+- Focus indicators visible
+- Screen reader friendly
+- Sufficient color contrast
+- Respect reduced motion preferences
+
+---
+
+## Key Principles
+
+1. **Be Bold** - Don't be afraid to try unique layouts and interactions
+2. **Be Consistent** - Use the same patterns for similar functions
+3. **Be Responsive** - Design works beautifully on all devices
+4. **Be Fast** - Animations are smooth, loading is quick
+5. **Be Accessible** - Everyone can use what you build
+6. **Be Modern** - Use current design trends and technologies
+7. **Be Unique** - Each project should have its own personality
+8. **Be Intuitive** - Users shouldn't need instructions
+
+
+---
+
+# Project-Specific Customizations
+
+**IMPORTANT: This section contains the specific design requirements for THIS project. The guidelines above are universal best practices - these customizations below take precedence for project-specific decisions.**
+
+## User Design Requirements
+
+- Maintain premium visuals, generous whitespace, and a calm, trustworthy interface.
+- Ensure visual hierarchy supports quick user comprehension during the reset flow.
+- Keep interactions smooth with subtle hover/focus transitions and consistent button states.
+
+Color Palette, Typography, and Layout
+- Follow the specified LuxeFlow color tokens and typography.
+- Cards with subtle shadows (rgba(34,34,34,0.07)), 4-8px border radius.
+- Accent actions in olive green (#8A9A5B); backgrounds in white (#FFFFFF) and neutrals (#F6F6F6, #EEEEEE).
+- High-contrast text (#222222) with secondary text in #888888.
+
+Mandatory Coding Standards — Runtime Safety
+CRITICAL: Implement all runtime safety rules in the generated code:
+1) Supabase-like results handling:
+   - const items = data ?? []
+2) Array methods safety:
+   - (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
+3) useState defaults for arrays/objects:
+   - useState<Type[]>([])
+4) API response shapes:
+   - const list = Array.isArray(response?.data) ? response.data : []
+5) Optional chaining:
+   - obj?.property?.nested
+6) Destructuring with defaults:
+   - const { items = [], count = 0 } = response ?? {}
+
+Project Context Integration
+- This feature integrates with: Auth + Roles (Admin, Agent, Ops, Finance), Sign-up, Login, SSO, and session management.
+- Connected pages: Login Page with secure login and SSO options; ensure seamless navigation between Login, Sign Up, and Password Reset.
+- Ensure consistent design language and components across pages for a cohesive UX.
+
+Deliverables
+- Complete React TypeScript components for Password Reset Request, Password Reset with token, TokenStatusBanner, and supportive UI elements.
+- API service layer with typed request/response contracts, including proper error handling and null safety.
+- Tests (unit/integration) covering:
+  - Email validation and error paths.
+  - Token parsing and validation paths (valid, invalid, expired).
+  - Password strength and matching logic.
+  - Safe handling of API responses with potential null data.
+- Documentation:
+  - API contracts summary.
+  - Data model notes for PasswordResetToken and related flows.
+  - Deployment considerations for security and performance (rate limiting, token expiry windows, etc.).
+
+Notes for AI Development Tool
+- Leverage existing design tokens and component library if present; otherwise implement lightweight, accessible equivalents aligned to LuxeFlow style.
+- Ensure code is modular, reusable, and easy to extend (e.g., if email templates or token strategies evolve).
+- Include robust error handling and graceful fallbacks to satisfy the runtime safety requirements.
+- Provide clear comments explaining security decisions and data flow, especially around token handling and password updates.
+
+If you need, I can produce a ready-to-run code scaffold (TypeScript React) with the components, API service stubs, and example tests that adhere to the above standards.
+
+## Implementation Notes
+
+When implementing this project:
+
+1. **Follow Universal Guidelines**: Use the design best practices documented above as your foundation
+2. **Apply Project Customizations**: Implement the specific design requirements stated in the "User Design Requirements" section
+3. **Priority Order**: Project-specific requirements override universal guidelines when there's a conflict
+4. **Color System**: Extract and implement color values as CSS custom properties in RGB format
+5. **Typography**: Define font families, sizes, and weights based on specifications
+6. **Spacing**: Establish consistent spacing scale following the design system
+7. **Components**: Style all Shadcn components to match the design aesthetic
+8. **Animations**: Use Motion library for transitions matching the design personality
+9. **Responsive Design**: Ensure mobile-first responsive implementation
+
+## Implementation Checklist
+
+- [ ] Review universal design guidelines above
+- [ ] Extract project-specific color palette and define CSS variables
+- [ ] Configure Tailwind theme with custom colors
+- [ ] Set up typography system (fonts, sizes, weights)
+- [ ] Define spacing and sizing scales
+- [ ] Create component variants matching design
+- [ ] Implement responsive breakpoints
+- [ ] Add animations and transitions
+- [ ] Ensure accessibility standards
+- [ ] Validate against user design requirements
+
+---
+
+**Remember: Always reference this file for design decisions. Do not use generic or placeholder designs.**
+ for bestpractices and # Dashboard
+
+## Overview
+Create a role-aware, enterprise-grade Dashboard for LuxeFlow CRM that surfaces time-critical operational data and enables quick actions. The page should present a set of widgets including Operations Command Center, upcoming stays, payment due list, overdue tasks, revenue/commission snapshot, alerts, and quick actions. It must integrate with existing authentication and authorization, respect permissions per role (Admin, Agent, Ops, Finance), and provide a smooth, premium user experience aligned with LuxeFlow’s luxury design system. All data handling must be resilient to null/undefined values and guarded against runtime errors as per the mandatory runtime safety rules.
+
+## Page Description (Full Detail)
+The Dashboard is the Role-aware home screen for LuxeFlow users. Its goals are to give each user a consolidated, at-a-glance view of time-sensitive work and performance metrics, plus fast access to common actions. Connected features include client management, bookings, payments, tasks, and alerts within the LuxeFlow CRM. UI should be information-dense yet approachable, with clear visual hierarchy and generous whitespace.
+
+Key UI elements and guidance:
+- Global header with:
+  - Organization switcher (org-level scope)
+  - User avatar and quick profile actions
+  - Quick search field
+- Operations Command Center widget:
+  - Upcoming check-ins/check-outs within the next 7 days
+  - Outstanding balances by due date
+  - Overdue tasks
+  - Approvals needed (e.g., VIP requests, vendor approvals)
+- Upcoming Stays widget:
+  - Mini calendar or list of upcoming stays with dates, client name, resort, room type
+- Payment Due List widget:
+  - List of payments due, with due date, amount, client, booking reference, payment status
+- Overdue Tasks widget:
+  - Top overdue tasks, assignees, due dates, SLA color tags
+- Revenue/Commission Snapshot widget:
+  - KPI cards: Bookings count, Gross Booking Value (GBV), Commission Earned
+  - Date range selector (e.g., Last 7/30/90 days, custom)
+- Alerts widget:
+  - Time-sensitive alerts with priority, short description, due date
+- Quick Actions widget:
+  - Shortcuts: New Client, New Booking, Create Task, Search Resort
+- AI Assistant Quick Access Button:
+  - Nearby chat/button to trigger AI assistant for insights or drafting tasks and itineraries
+- Visual behavior:
+  - Sticky header with subtle fade
+  - Cards with soft shadows, light borders, and rounded corners per design system
+  - Hover states for interactive cards and actions
+  - Data visualizations kept minimalist (monochrome or accent color emphasis) without clutter
+- Responsiveness:
+  - Desktop: grid layout with multiple widgets
+  - Tablet/Mobile: reflow to stacked cards with accessible tap targets; collapsible sections as needed
+
+## Components to Build
+- DashboardLayout
+  - Layout container, responsive grid, header integration, org/user switcher, search
+- Widget: Operations Command Center
+  - Sub-sections for upcoming checks, balances by due date, overdue tasks, approvals
+- Widget: Upcoming Stays
+  - Mini-calendar or compact list with key fields
+- Widget: Payment Due List
+  - Table or list with sorting by due date, status badges
+- Widget: Overdue Tasks
+  - List with task title, due date, assignee, priority
+- Widget: Revenue Snapshot
+  - KPI cards (Bookings, GBV, Commission) and date-range selector
+- Widget: Alerts
+  - List of alerts with priority, description, due date
+- Widget: Quick Actions
+  - Button set for Create actions
+- Widget: AI Assistant Quick Access
+  - Floating or prominent button to open AI assistant
+- Data Helpers
+  - Safe data fetch utilities, null guards, and formatting
+- Shared UI Elements
+  - Card, divider, button, input, select components that align with the design system
+- State Management Hooks
+  - useDashboardData (fetch and normalize dashboard data per role)
+  - usePermissions (determine which widgets to show)
+
+Technical details:
+- All data fetching should tolerate null results and default to [] where arrays are expected.
+- Use data ?? [] for arrays originating from API responses.
+- Guard all array operations with Array.isArray or (items ?? []).map(...) patterns.
+- Use useState<T[]>([]) for array-based state defaults.
+- Validate API responses with Array.isArray checks, e.g., const list = Array.isArray(response?.data) ? response.data : [].
+
+## Implementation Requirements
+
+### Frontend
+- Framework: React with TypeScript (preferred); ensure type-safe components.
+- Architecture:
+  - Component-driven: each widget is its own React component with props for data and actions.
+  - Central DashboardContainer to orchestrate data fetches and layout.
+- UI Components:
+  - Card component: consistent padding, shadow, border radius, hover lift
+  - ListRow component: for tasks, alerts, payments with proper typography
+  - KPICard component: for revenue snapshot
+  - DateRangePicker component: for revenue range
+  - MiniCalendar component: compact calendar view
+  - Button component: primary olive green with accessible contrast
+  - Input/Search component: for global search
+- Accessibility:
+  - All interactive controls have ARIA labels
+  - Keyboard navigable, focus states clearly visible
+- Performance:
+  - Debounced or throttled search
+  - Lazy loading lists if large
+  - Use memoization to prevent unnecessary rerenders
+- Runtime safety:
+  - Always guard against null/undefined values when using arrays
+  - Example: (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
+  - Initialize all array states with []: useState<MyType[]>([])
+- State and Data flow:
+  - Role-aware rendering: show/hide widgets based on user role from auth/permissions
+  - Data normalization: standardize date formats, currency, and IDs client-side
+  - Persist user date range preference for revenue snapshot per user (optional)
+
+### Backend
+- APIs to support Dashboard data (illustrative; implemented as needed by existing backend):
+  - GET /api/dashboard/overview
+    - Returns: role-specific overview including upcomingStays, paymentsDue, overdueTasks, approvals, alerts, revenueSnapshot
+  - GET /api/stays/upcoming?days=7
+  - GET /api/payments/due
+  - GET /api/tasks/overdue
+  - GET /api/revenue/snapshot?range=7d
+  - GET /api/alerts
+  - GET /api/permissions
+- Data models:
+  - Stay: id, clientId, resort, checkIn, checkOut, status
+  - Payment: id, bookingId, clientId, amount, dueDate, status
+  - Task: id, title, dueDate, assigneeId, priority, status
+  - RevenueSnapshot: bookings, gbv, commission, currency, range
+  - Alert: id, priority, message, dueDate
+- Database tables should support fast filtering for date ranges, overdue items, and role-based access
+- Validation:
+  - Ensure responses could be null; sanitize to arrays using data ?? []
+  - Validate numeric fields and dates on the server; return stable shapes
+
+### Integration
+- Data wiring:
+  - DashboardLayout fetches permission data and user role
+  - Each widget fetches its own data or consume aggregated data from /api/dashboard/overview
+  - All data must be sanitized: arrays default to [], dates parsed safely, currency formatted
+- Error handling:
+  - Centralized error boundary for the dashboard with user-friendly messaging
+  - Fallback UI states for loading, empty, and error conditions
+- Theming:
+  - Use design system tokens for colors, typography, spacing
+- Security:
+  - Ensure endpoints enforce authentication and role-based authorization
+  - Do not leak data across roles
+
+## User Experience Flow
+1. User logs in via Login Page (see separate page prompt). Upon successful auth and role detection, lands on Dashboard.
+2. Dashboard header shows org switcher, user avatar, and search.
+3. Dashboard renders role-appropriate widgets:
+   - Admin/Ops see all widgets including Operations Command Center and Revenue Snapshot
+   - Agent sees a filtered view relevant to their bookings and tasks
+   - Finance sees payment-related widgets with due dates and alerts
+4. User interacts:
+   - Clicks an overdue task to open task detail modal
+   - Uses date range picker to adjust revenue snapshot
+   - Opens AI Assistant to generate itinerary drafts or tasks
+   - Creates a new client or booking via Quick Actions
+5. Data updates in real-time or near real-time, with optimistic UI where appropriate and proper error messaging when needed.
+
+## Technical Specifications
+
+Data Models: (Schema highlights)
+- Stay { id, clientId, resortId, checkIn: string, checkOut: string, status }
+- Payment { id, bookingId, clientId, amount: number, dueDate: string, status }
+- Task { id, title, dueDate: string, assigneeId, priority: string, status }
+- RevenueSnapshot { bookings: number, gbv: number, commission: number, currency: string, range: string }
+- Alert { id, priority: string, message: string, dueDate: string }
+
+API Endpoints (examples)
+- GET /api/dashboard/overview
+  - Response: { upcomingStays: Stay[], paymentsDue: Payment[], overdueTasks: Task[], approvals: any[], alerts: Alert[], revenue: RevenueSnapshot }
+- GET /api/stays/upcoming?days=7
+- GET /api/payments/due
+- GET /api/tasks/overdue
+- GET /api/revenue/snapshot?range=7d
+- GET /api/alerts
+- GET /api/permissions
+
+Security
+- Authentication: JWT/OAuth as per project
+- Authorization: Role-based permission checks for each widget
+- Data privacy: Ensure only permitted data is exposed per role
+
+Validation
+- Client-side: Validate inputs (date formats, numeric fields) before submission
+- Server-side: Validate payloads; sanitize and normalize responses to expected shapes
+
+Acceptance Criteria
+- [ ] Dashboard loads with role-appropriate widgets visible
+- [ ] All data arrays are guarded against null/undefined using data ?? [] or Array.isArray checks
+- [ ] No runtime errors when API returns null or empty arrays
+- [ ] Revenue snapshot date range selector updates KPI cards correctly
+- [ ] Quick Actions open modals or forms with proper validation
+- [ ] AI Assistant opens and returns draft content without exposing sensitive data
+- [ ] Login Page supports SSO options and links to sign up and password reset
+- [ ] UI adheres to the LuxeFlow design system, with responsive behavior and accessibility standards
+
+UI/UX Guidelines
+Apply the project’s design system:
+- Use the luxury, modern aesthetic with generous whitespace, subtle opulence
+- Cards with soft shadows, light borders, and rounded corners
+- Olive green accents for primary actions
+- Serif headings (Playfair Display/Georgia) and sans-serif body text (Lato/Helvetica Neue)
+- Focus on clarity and calm professionalism
+- Ensure consistent typography, spacing, and alignment
+- Data visualizations are minimalist; avoid heavy grids
+
+Visual Style
+
+Color Palette:
+- Primary: #FFFFFF
+- Accent: #8A9A5B
+- Neutrals: #F6F6F6, #EEEEEE
+- Text: #222222, #888888
+- Supporting: #C6AB62
+
+Typography & Layout:
+- Headings: serif (Playfair Display, Georgia)
+- Body: sans-serif (Lato, Helvetica Neue)
+- Hierarchy: bold, spacious headers; clear body
+- Spacing: generous padding, ample whitespace
+- Alignment: left-aligned content; center headers/callouts
+- Special Treatments: uppercase section labels; italic quotes
+
+Key Design Elements
+- Card Design: white background, subtle box-shadow, 4-8px radius; dividers; hover lift; border accents
+- Navigation: sticky header, logo alignment, hover underline, active state highlight
+- Data Visualization: minimalist charts if used; emphasis on clarity
+- Interactive Elements: olive green buttons; white inputs with light borders; accessible focus states; smooth transitions
+
+Design Philosophy
+- Refined luxury, minimalism with subtle opulence
+- Clear, airy layouts; emphasis on legibility and premium feel
+- Deterministic, low-noise UI to support fast decision-making
+
+Mandatory Coding Standards — Runtime Safety
+- Supabase/API results: const items = data ?? []
+- Arrays: (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
+- useState: useState<Type[]>([]) for arrays
+- API responses: const list = Array.isArray(response?.data) ? response.data : []
+- Optional chaining: obj?.property?.nested
+- Destructuring with defaults: const { items = [], count = 0 } = response ?? {}
+
+Connected Pages
+- Login Page: Secure login form for existing users with SSO options and links to sign up and password reset
+
+Deliverables
+- Fully functional Dashboard page and supporting components
+- TypeScript types for data models
+- API contracts and stubbed/mocked responses for local development
+- Reusable design-system-aligned components
+- Comprehensive README with run/debug instructions and testing notes
+
+If you need a concrete file structure, starter code snippets, or API contract examples to begin scaffolding, I can provide those next. for style.
+
+CRITICAL DESIGN REQUIREMENTS:
+- You MUST follow ALL design principles and patterns specified in the Design Reference above
+- Do NOT deviate from the design specifications without explicit user permission
+- Implement ALL visual design elements (colors, typography, spacing, shadows, animations) as specified
+- Follow the layout patterns and component designs exactly as documented
+- Ensure all interactions and micro-animations match the reference specifications
+
+CRITICAL TECHNICAL REQUIREMENTS:
+- React 18.3.1, React Router 6.30.1
+- Tailwind CSS v3 with tailwind.config.js and custom keyframes
+- @tailwindcss/typography plugin for rich text content
+- Tailwind CSS animations (NOT Motion library or framer-motion)
+- Sonner for toasts
+- Recharts for data visualization
+- Native fetch() with API utilities in src/lib/api.ts
+- Design system with CSS custom properties
+- Use RGB color values for theming
+- When Supabase is configured: use Edge Functions for LLM and server-only logic; never expose API keys in the client
+
+=== TASK ===
+# Dashboard
+
+## Overview
+Create a role-aware, enterprise-grade Dashboard for LuxeFlow CRM that surfaces time-critical operational data and enables quick actions. The page should present a set of widgets including Operations Command Center, upcoming stays, payment due list, overdue tasks, revenue/commission snapshot, alerts, and quick actions. It must integrate with existing authentication and authorization, respect permissions per role (Admin, Agent, Ops, Finance), and provide a smooth, premium user experience aligned with LuxeFlow’s luxury design system. All data handling must be resilient to null/undefined values and guarded against runtime errors as per the mandatory runtime safety rules.
+
+## Page Description (Full Detail)
+The Dashboard is the Role-aware home screen for LuxeFlow users. Its goals are to give each user a consolidated, at-a-glance view of time-sensitive work and performance metrics, plus fast access to common actions. Connected features include client management, bookings, payments, tasks, and alerts within the LuxeFlow CRM. UI should be information-dense yet approachable, with clear visual hierarchy and generous whitespace.
+
+Key UI elements and guidance:
+- Global header with:
+  - Organization switcher (org-level scope)
+  - User avatar and quick profile actions
+  - Quick search field
+- Operations Command Center widget:
+  - Upcoming check-ins/check-outs within the next 7 days
+  - Outstanding balances by due date
+  - Overdue tasks
+  - Approvals needed (e.g., VIP requests, vendor approvals)
+- Upcoming Stays widget:
+  - Mini calendar or list of upcoming stays with dates, client name, resort, room type
+- Payment Due List widget:
+  - List of payments due, with due date, amount, client, booking reference, payment status
+- Overdue Tasks widget:
+  - Top overdue tasks, assignees, due dates, SLA color tags
+- Revenue/Commission Snapshot widget:
+  - KPI cards: Bookings count, Gross Booking Value (GBV), Commission Earned
+  - Date range selector (e.g., Last 7/30/90 days, custom)
+- Alerts widget:
+  - Time-sensitive alerts with priority, short description, due date
+- Quick Actions widget:
+  - Shortcuts: New Client, New Booking, Create Task, Search Resort
+- AI Assistant Quick Access Button:
+  - Nearby chat/button to trigger AI assistant for insights or drafting tasks and itineraries
+- Visual behavior:
+  - Sticky header with subtle fade
+  - Cards with soft shadows, light borders, and rounded corners per design system
+  - Hover states for interactive cards and actions
+  - Data visualizations kept minimalist (monochrome or accent color emphasis) without clutter
+- Responsiveness:
+  - Desktop: grid layout with multiple widgets
+  - Tablet/Mobile: reflow to stacked cards with accessible tap targets; collapsible sections as needed
+
+## Components to Build
+- DashboardLayout
+  - Layout container, responsive grid, header integration, org/user switcher, search
+- Widget: Operations Command Center
+  - Sub-sections for upcoming checks, balances by due date, overdue tasks, approvals
+- Widget: Upcoming Stays
+  - Mini-calendar or compact list with key fields
+- Widget: Payment Due List
+  - Table or list with sorting by due date, status badges
+- Widget: Overdue Tasks
+  - List with task title, due date, assignee, priority
+- Widget: Revenue Snapshot
+  - KPI cards (Bookings, GBV, Commission) and date-range selector
+- Widget: Alerts
+  - List of alerts with priority, description, due date
+- Widget: Quick Actions
+  - Button set for Create actions
+- Widget: AI Assistant Quick Access
+  - Floating or prominent button to open AI assistant
+- Data Helpers
+  - Safe data fetch utilities, null guards, and formatting
+- Shared UI Elements
+  - Card, divider, button, input, select components that align with the design system
+- State Management Hooks
+  - useDashboardData (fetch and normalize dashboard data per role)
+  - usePermissions (determine which widgets to show)
+
+Technical details:
+- All data fetching should tolerate null results and default to [] where arrays are expected.
+- Use data ?? [] for arrays originating from API responses.
+- Guard all array operations with Array.isArray or (items ?? []).map(...) patterns.
+- Use useState<T[]>([]) for array-based state defaults.
+- Validate API responses with Array.isArray checks, e.g., const list = Array.isArray(response?.data) ? response.data : [].
+
+## Implementation Requirements
+
+### Frontend
+- Framework: React with TypeScript (preferred); ensure type-safe components.
+- Architecture:
+  - Component-driven: each widget is its own React component with props for data and actions.
+  - Central DashboardContainer to orchestrate data fetches and layout.
+- UI Components:
+  - Card component: consistent padding, shadow, border radius, hover lift
+  - ListRow component: for tasks, alerts, payments with proper typography
+  - KPICard component: for revenue snapshot
+  - DateRangePicker component: for revenue range
+  - MiniCalendar component: compact calendar view
+  - Button component: primary olive green with accessible contrast
+  - Input/Search component: for global search
+- Accessibility:
+  - All interactive controls have ARIA labels
+  - Keyboard navigable, focus states clearly visible
+- Performance:
+  - Debounced or throttled search
+  - Lazy loading lists if large
+  - Use memoization to prevent unnecessary rerenders
+- Runtime safety:
+  - Always guard against null/undefined values when using arrays
+  - Example: (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
+  - Initialize all array states with []: useState<MyType[]>([])
+- State and Data flow:
+  - Role-aware rendering: show/hide widgets based on user role from auth/permissions
+  - Data normalization: standardize date formats, currency, and IDs client-side
+  - Persist user date range preference for revenue snapshot per user (optional)
+
+### Backend
+- APIs to support Dashboard data (illustrative; implemented as needed by existing backend):
+  - GET /api/dashboard/overview
+    - Returns: role-specific overview including upcomingStays, paymentsDue, overdueTasks, approvals, alerts, revenueSnapshot
+  - GET /api/stays/upcoming?days=7
+  - GET /api/payments/due
+  - GET /api/tasks/overdue
+  - GET /api/revenue/snapshot?range=7d
+  - GET /api/alerts
+  - GET /api/permissions
+- Data models:
+  - Stay: id, clientId, resort, checkIn, checkOut, status
+  - Payment: id, bookingId, clientId, amount, dueDate, status
+  - Task: id, title, dueDate, assigneeId, priority, status
+  - RevenueSnapshot: bookings, gbv, commission, currency, range
+  - Alert: id, priority, message, dueDate
+- Database tables should support fast filtering for date ranges, overdue items, and role-based access
+- Validation:
+  - Ensure responses could be null; sanitize to arrays using data ?? []
+  - Validate numeric fields and dates on the server; return stable shapes
+
+### Integration
+- Data wiring:
+  - DashboardLayout fetches permission data and user role
+  - Each widget fetches its own data or consume aggregated data from /api/dashboard/overview
+  - All data must be sanitized: arrays default to [], dates parsed safely, currency formatted
+- Error handling:
+  - Centralized error boundary for the dashboard with user-friendly messaging
+  - Fallback UI states for loading, empty, and error conditions
+- Theming:
+  - Use design system tokens for colors, typography, spacing
+- Security:
+  - Ensure endpoints enforce authentication and role-based authorization
+  - Do not leak data across roles
+
+## User Experience Flow
+1. User logs in via Login Page (see separate page prompt). Upon successful auth and role detection, lands on Dashboard.
+2. Dashboard header shows org switcher, user avatar, and search.
+3. Dashboard renders role-appropriate widgets:
+   - Admin/Ops see all widgets including Operations Command Center and Revenue Snapshot
+   - Agent sees a filtered view relevant to their bookings and tasks
+   - Finance sees payment-related widgets with due dates and alerts
+4. User interacts:
+   - Clicks an overdue task to open task detail modal
+   - Uses date range picker to adjust revenue snapshot
+   - Opens AI Assistant to generate itinerary drafts or tasks
+   - Creates a new client or booking via Quick Actions
+5. Data updates in real-time or near real-time, with optimistic UI where appropriate and proper error messaging when needed.
+
+## Technical Specifications
+
+Data Models: (Schema highlights)
+- Stay { id, clientId, resortId, checkIn: string, checkOut: string, status }
+- Payment { id, bookingId, clientId, amount: number, dueDate: string, status }
+- Task { id, title, dueDate: string, assigneeId, priority: string, status }
+- RevenueSnapshot { bookings: number, gbv: number, commission: number, currency: string, range: string }
+- Alert { id, priority: string, message: string, dueDate: string }
+
+API Endpoints (examples)
+- GET /api/dashboard/overview
+  - Response: { upcomingStays: Stay[], paymentsDue: Payment[], overdueTasks: Task[], approvals: any[], alerts: Alert[], revenue: RevenueSnapshot }
+- GET /api/stays/upcoming?days=7
+- GET /api/payments/due
+- GET /api/tasks/overdue
+- GET /api/revenue/snapshot?range=7d
+- GET /api/alerts
+- GET /api/permissions
+
+Security
+- Authentication: JWT/OAuth as per project
+- Authorization: Role-based permission checks for each widget
+- Data privacy: Ensure only permitted data is exposed per role
+
+Validation
+- Client-side: Validate inputs (date formats, numeric fields) before submission
+- Server-side: Validate payloads; sanitize and normalize responses to expected shapes
+
+Acceptance Criteria
+- [ ] Dashboard loads with role-appropriate widgets visible
+- [ ] All data arrays are guarded against null/undefined using data ?? [] or Array.isArray checks
+- [ ] No runtime errors when API returns null or empty arrays
+- [ ] Revenue snapshot date range selector updates KPI cards correctly
+- [ ] Quick Actions open modals or forms with proper validation
+- [ ] AI Assistant opens and returns draft content without exposing sensitive data
+- [ ] Login Page supports SSO options and links to sign up and password reset
+- [ ] UI adheres to the LuxeFlow design system, with responsive behavior and accessibility standards
+
+UI/UX Guidelines
+Apply the project’s design system:
+- Use the luxury, modern aesthetic with generous whitespace, subtle opulence
+- Cards with soft shadows, light borders, and rounded corners
+- Olive green accents for primary actions
+- Serif headings (Playfair Display/Georgia) and sans-serif body text (Lato/Helvetica Neue)
+- Focus on clarity and calm professionalism
+- Ensure consistent typography, spacing, and alignment
+- Data visualizations are minimalist; avoid heavy grids
+
+Visual Style
+
+Color Palette:
+- Primary: #FFFFFF
+- Accent: #8A9A5B
+- Neutrals: #F6F6F6, #EEEEEE
+- Text: #222222, #888888
+- Supporting: #C6AB62
+
+Typography & Layout:
+- Headings: serif (Playfair Display, Georgia)
+- Body: sans-serif (Lato, Helvetica Neue)
+- Hierarchy: bold, spacious headers; clear body
+- Spacing: generous padding, ample whitespace
+- Alignment: left-aligned content; center headers/callouts
+- Special Treatments: uppercase section labels; italic quotes
+
+Key Design Elements
+- Card Design: white background, subtle box-shadow, 4-8px radius; dividers; hover lift; border accents
+- Navigation: sticky header, logo alignment, hover underline, active state highlight
+- Data Visualization: minimalist charts if used; emphasis on clarity
+- Interactive Elements: olive green buttons; white inputs with light borders; accessible focus states; smooth transitions
+
+Design Philosophy
+- Refined luxury, minimalism with subtle opulence
+- Clear, airy layouts; emphasis on legibility and premium feel
+- Deterministic, low-noise UI to support fast decision-making
+
+Mandatory Coding Standards — Runtime Safety
+- Supabase/API results: const items = data ?? []
+- Arrays: (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
+- useState: useState<Type[]>([]) for arrays
+- API responses: const list = Array.isArray(response?.data) ? response.data : []
+- Optional chaining: obj?.property?.nested
+- Destructuring with defaults: const { items = [], count = 0 } = response ?? {}
+
+Connected Pages
+- Login Page: Secure login form for existing users with SSO options and links to sign up and password reset
+
+Deliverables
+- Fully functional Dashboard page and supporting components
+- TypeScript types for data models
+- API contracts and stubbed/mocked responses for local development
+- Reusable design-system-aligned components
+- Comprehensive README with run/debug instructions and testing notes
+
+If you need a concrete file structure, starter code snippets, or API contract examples to begin scaffolding, I can provide those next.
+
+=== SUCCESS CRITERIA ===
+# Success Criteria Checklist
+
+## Code Quality
+
+### TypeScript
+- [ ] No TypeScript errors (`tsc --noEmit` passes)
+- [ ] All functions and components have proper type definitions
+- [ ] No `any` types used (use `unknown` if type is truly unknown)
+- [ ] Props interfaces defined for all components
+- [ ] API responses have type definitions
+
+### Code Standards
+- [ ] All imports use path aliases (@/ prefix)
+- [ ] Components follow the established naming convention
+- [ ] Files are organized in correct directories
+- [ ] No unused imports or variables
+- [ ] Consistent code formatting
+
+## Component Implementation
+
+### UI Components
+- [ ] Use shadcn/ui components (Button, Card, Input, etc.) instead of building from scratch
+- [ ] All interactive elements have hover states
+- [ ] Components use the `cn()` utility for class merging
+- [ ] Proper TypeScript props interfaces defined
+- [ ] Components are responsive (mobile, tablet, desktop)
+
+### Animations
+- [ ] Motion library used for all animations (NOT framer-motion)
+- [ ] Page transitions implemented with fade/slide
+- [ ] Interactive elements have whileHover/whileTap animations
+- [ ] List items use stagger animations where appropriate
+- [ ] Animations respect `prefers-reduced-motion`
+
+### Icons
+- [ ] Lucide React icons used consistently
+- [ ] Icons have consistent sizing (h-4 w-4, h-5 w-5, h-6 w-6)
+- [ ] Icon colors match design system (text-primary, text-muted-foreground)
+
+## Data Management
+
+### React Query
+- [ ] All data fetching uses React Query hooks
+- [ ] Query keys follow the established pattern
+- [ ] Mutations invalidate related queries
+- [ ] Loading and error states handled
+- [ ] Optimistic updates implemented where appropriate
+
+### Forms
+- [ ] Forms use react-hook-form
+- [ ] Validation uses Zod schemas
+- [ ] Error messages display properly
+- [ ] Form submission shows loading state
+- [ ] Success/error feedback via toast notifications
+
+### API Layer
+- [ ] API functions in src/api/ directory
+- [ ] Axios used for HTTP requests
+- [ ] Proper error handling with try/catch
+- [ ] Auth tokens handled by interceptors
+- [ ] Type-safe API function signatures
+
+## User Experience
+
+### Notifications
+- [ ] Sonner toasts used for all notifications
+- [ ] Success actions show success toast
+- [ ] Errors show descriptive error messages
+- [ ] Loading states show toast.loading()
+
+### Loading States
+- [ ] Skeleton loaders shown during data fetch
+- [ ] Buttons show loading state during submission
+- [ ] Disabled state applied during async operations
+
+### Error Handling
+- [ ] Network errors caught and displayed
+- [ ] User-friendly error messages (no stack traces)
+- [ ] Fallback UI for error states
+- [ ] No unhandled promise rejections
+
+## Navigation
+
+### Route Accessibility
+- [ ] All pages have routes defined in router configuration
+- [ ] Every page is accessible through navigation (menu, sidebar, or direct URL)
+- [ ] Main pages (Dashboard, Home, Settings, etc.) accessible from primary navigation
+- [ ] Secondary pages accessible through contextual navigation or direct links
+- [ ] Deep-linked pages have breadcrumbs or back navigation
+- [ ] 404/Not Found page implemented for invalid routes
+- [ ] Protected routes have proper authentication checks
+- [ ] Navigation state persists across page refreshes where appropriate
+
+### Navigation UX
+- [ ] Active route highlighted in navigation menu
+- [ ] Clear visual hierarchy in navigation structure
+- [ ] Mobile navigation is accessible and usable
+- [ ] Navigation items have hover/focus states
+- [ ] Nested routes show parent-child relationships
+- [ ] User can always return to main areas (Dashboard/Home)
+
+## Styling
+
+### Tailwind CSS
+- [ ] Tailwind v3 classes used
+- [ ] HSL color variables from design system
+- [ ] Custom CSS properties used where defined
+- [ ] Responsive breakpoints: mobile-first approach
+- [ ] Dark mode support via CSS variables
+
+### Design System
+- [ ] Colors use theme variables (primary, secondary, accent)
+- [ ] Spacing uses Tailwind scale (p-4, gap-6, etc.)
+- [ ] Border radius uses theme values (rounded-lg)
+- [ ] Shadows use theme values (shadow-card)
+- [ ] Typography follows Inter font system
+
+## Accessibility
+
+- [ ] Semantic HTML elements used
+- [ ] Buttons have descriptive labels
+- [ ] Forms have proper labels
+- [ ] Focus states visible on interactive elements
+- [ ] Color contrast meets WCAG standards
+
+## Performance
+
+- [ ] No console.log statements in production code
+- [ ] No console errors in browser
+- [ ] Images optimized (WebP, lazy loading)
+- [ ] Large lists use virtualization if needed
+- [ ] React Query cache configured appropriately
+
+## Testing Readiness
+
+- [ ] Components structured for easy testing
+- [ ] Business logic separated from presentation
+- [ ] Mock-friendly API layer
+- [ ] No hardcoded values that should be configurable
+- [ ] Environment variables properly configured
+
+## Final Checks
+
+- [ ] Code builds without errors (`npm run build`)
+- [ ] Development server runs without errors (`npm run dev`)
+- [ ] No TypeScript errors in editor
+- [ ] Browser console is clean (no errors or warnings)
+- [ ] All functionality works as expected
+- [ ] Code follows existing project patterns
+- [ ] Changes are consistent with the rest of the codebase
+
+
+
+IMPORTANT: ALL styling and design decisions must follow the Design Reference section above EXACTLY. Do not make arbitrary design choices.
+
+Analyze the existing project structure and implement the task following the patterns already established. Ensure all success criteria are met.
