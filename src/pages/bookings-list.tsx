@@ -1,38 +1,136 @@
-import { useState } from 'react'
+/**
+ * BookingsListPage - Centralized, filterable, exportable index of all bookings
+ * List view and pipeline (board) view; bulk export; quick actions
+ */
+import { useState, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, LayoutGrid, List } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { useBookings } from '@/hooks/use-bookings'
+import { useBulkSelection } from '@/hooks/use-bulk-selection'
+import { bookingsApi } from '@/api/bookings'
+import { toast } from 'sonner'
+import {
+  BookingsFiltersBar,
+  BookingTable,
+  BookingPipeline,
+  BulkExportPanel,
+  BookingsEmptyState,
+} from '@/components/bookings'
+import type { BookingFilters } from '@/types/booking'
 
-const mockBookings = [
-  { id: '1', client: 'Sarah Mitchell', resort: 'Villa Serenity', status: 'confirmed', checkIn: '2025-03-15', total: '€12,400' },
-  { id: '2', client: 'James Chen', resort: 'Ocean View Resort', status: 'quote', checkIn: '2025-04-01', total: '€8,200' },
-  { id: '3', client: 'Emma Laurent', resort: 'Mountain Lodge', status: 'pre-arrival', checkIn: '2025-03-08', total: '€15,600' },
-]
+const DEFAULT_PAGE_SIZE = 50
 
-const statusColors: Record<string, string> = {
-  quote: 'bg-gray-100 text-gray-700',
-  confirmed: 'bg-green-100 text-green-700',
-  'pre-arrival': 'bg-blue-100 text-blue-700',
-  'in-stay': 'bg-amber-100 text-amber-700',
-  'post-stay': 'bg-slate-100 text-slate-700',
+const DEFAULT_FILTERS: BookingFilters = {
+  sort: 'last_updated',
+  sortOrder: 'desc',
+  page: 1,
+  pageSize: DEFAULT_PAGE_SIZE,
 }
 
 export function BookingsList() {
-  const [view, setView] = useState<'table' | 'board'>('table')
+  const [filters, setFilters] = useState<BookingFilters>(DEFAULT_FILTERS)
+  const [viewMode, setViewMode] = useState<'list' | 'pipeline'>('list')
+
+  const { bookings, count, isLoading, refetch } = useBookings(filters)
+  const {
+    selectedIds,
+    toggle,
+    toggleAll,
+    clear,
+    isSelected,
+    isAllSelected,
+    isSomeSelected,
+  } = useBulkSelection()
+
+  const list = bookings ?? []
+
+  const hasActiveFilters = useMemo(
+    () =>
+      !!(
+        filters.status ||
+        filters.agent_id ||
+        filters.resort_id ||
+        filters.check_in_from ||
+        filters.check_in_to ||
+        (filters.balance_min != null && filters.balance_min > 0) ||
+        filters.search
+      ),
+    [filters]
+  )
+
+  const handleApply = useCallback(() => {
+    refetch()
+  }, [refetch])
+
+  const handleReset = useCallback(() => {
+    setFilters(DEFAULT_FILTERS)
+  }, [])
+
+  const handleExportComplete = useCallback(() => {
+    refetch()
+    clear()
+  }, [refetch, clear])
+
+  const handleSendReminder = useCallback(
+    async (id: string) => {
+      try {
+        await bookingsApi.sendReminder(id)
+        toast.success('Reminder sent')
+        refetch()
+      } catch {
+        toast.error('Failed to send reminder')
+      }
+    },
+    [refetch]
+  )
+
+  const handleCreateInvoice = useCallback(
+    async (id: string) => {
+      try {
+        await bookingsApi.createInvoice(id)
+        toast.success('Invoice created')
+        refetch()
+      } catch {
+        toast.error('Failed to create invoice')
+      }
+    },
+    [refetch]
+  )
+
+  const handleExport = useCallback(() => {
+    toast.info('Export single booking')
+  }, [])
+
+  const totalPages =
+    Math.ceil((count ?? 0) / (filters.pageSize ?? DEFAULT_PAGE_SIZE)) || 1
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-serif text-3xl font-semibold">Bookings</h1>
-          <p className="mt-1 text-muted-foreground">Pipeline and booking management</p>
+          <p className="mt-1 text-muted-foreground">
+            Pipeline and booking management
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button variant={view === 'table' ? 'default' : 'outline'} size="icon" onClick={() => setView('table')}>
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('list')}
+            aria-label="List view"
+            aria-pressed={viewMode === 'list'}
+          >
             <List className="h-4 w-4" />
           </Button>
-          <Button variant={view === 'board' ? 'default' : 'outline'} size="icon" onClick={() => setView('board')}>
+          <Button
+            variant={viewMode === 'pipeline' ? 'default' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('pipeline')}
+            aria-label="Pipeline view"
+            aria-pressed={viewMode === 'pipeline'}
+          >
             <LayoutGrid className="h-4 w-4" />
           </Button>
           <Button asChild>
@@ -44,63 +142,77 @@ export function BookingsList() {
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          {view === 'table' ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border bg-secondary/50">
-                    <th className="px-4 py-3 text-left text-sm font-medium">Client</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Resort</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Check-in</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mockBookings.map((b) => (
-                    <tr key={b.id} className="border-b border-border hover:bg-secondary/30">
-                      <td className="px-4 py-3">
-                        <Link to={`/dashboard/bookings/${b.id}`} className="font-medium hover:text-accent">
-                          {b.client}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3">{b.resort}</td>
-                      <td className="px-4 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[b.status] ?? 'bg-gray-100'}`}>
-                          {b.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">{b.checkIn}</td>
-                      <td className="px-4 py-3 font-medium">{b.total}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="grid gap-4 p-6 md:grid-cols-2 lg:grid-cols-3">
-              {['Quote', 'Confirmed', 'Pre-arrival'].map((col) => (
-                <div key={col} className="space-y-2">
-                  <h3 className="font-medium">{col}</h3>
-                  {mockBookings
-                    .filter((b) => b.status === col.toLowerCase().replace(' ', '-'))
-                    .map((b) => (
-                      <Link key={b.id} to={`/dashboard/bookings/${b.id}`}>
-                        <div className="rounded-lg border border-border p-4 transition-all hover:border-accent/50">
-                          <p className="font-medium">{b.client}</p>
-                          <p className="text-sm text-muted-foreground">{b.resort}</p>
-                          <p className="mt-2 font-medium">{b.total}</p>
-                        </div>
-                      </Link>
-                    ))}
-                </div>
-              ))}
+      <div className="rounded-lg border border-border bg-card p-4 shadow-card">
+        <BookingsFiltersBar
+          filters={filters}
+          onFiltersChange={setFilters}
+          onApply={handleApply}
+          onReset={handleReset}
+          hasActiveFilters={hasActiveFilters}
+        />
+      </div>
+
+      <BulkExportPanel
+        selectedIds={selectedIds}
+        onClearSelection={clear}
+        onExportComplete={handleExportComplete}
+      />
+
+      {list.length === 0 && !isLoading ? (
+        <BookingsEmptyState
+          hasFilters={hasActiveFilters}
+          onClearFilters={handleReset}
+        />
+      ) : viewMode === 'list' ? (
+        <>
+          <BookingTable
+            bookings={list}
+            isLoading={isLoading}
+            onToggleSelect={toggle}
+            onToggleSelectAll={toggleAll}
+            isAllSelected={isAllSelected}
+            isSomeSelected={isSomeSelected}
+            isSelected={isSelected}
+            onSendReminder={handleSendReminder}
+            onCreateInvoice={handleCreateInvoice}
+            onExport={handleExport}
+          />
+          {list.length > 0 && totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-border pt-4">
+              <p className="text-sm text-muted-foreground">
+                Showing {list.length} of {count} bookings
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={(filters.page ?? 1) === 1}
+                  onClick={() =>
+                    setFilters((f) => ({
+                      ...f,
+                      page: Math.max(1, (f.page ?? 1) - 1),
+                    }))
+                  }
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={(filters.page ?? 1) >= totalPages}
+                  onClick={() =>
+                    setFilters((f) => ({ ...f, page: (f.page ?? 1) + 1 }))
+                  }
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </>
+      ) : (
+        <BookingPipeline bookings={list} isLoading={isLoading} />
+      )}
     </div>
   )
 }
