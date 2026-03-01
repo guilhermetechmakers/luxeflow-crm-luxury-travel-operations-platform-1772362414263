@@ -39,19 +39,26 @@ const MOCK_ROOMS: Room[] = [
 
 function buildMockEvents(start: string, end: string): CalendarEvent[] {
   const events: CalendarEvent[] = []
-  const startDate = new Date(start)
-  const endDate = new Date(end)
+  const startDate = new Date(start + 'T00:00:00')
+  const endDate = new Date(end + 'T23:59:59')
+  const rangeMs = endDate.getTime() - startDate.getTime()
+  const dayMs = 24 * 60 * 60 * 1000
 
+  // Bookings with dates relative to range (day 0, 1, 2, etc. from start)
   const bookings = [
-    { id: 'b1', ref: 'LF-2025-001', checkIn: '2025-03-15', checkOut: '2025-03-22', resort: 'r1', agent: 'a1', status: 'confirmed' as const },
-    { id: 'b2', ref: 'LF-2025-002', checkIn: '2025-04-01', checkOut: '2025-04-08', resort: 'r2', agent: 'a2', status: 'quote' as const },
-    { id: 'b3', ref: 'LF-2025-003', checkIn: '2025-03-08', checkOut: '2025-03-15', resort: 'r3', agent: 'a1', status: 'pre_arrival' as const },
-    { id: 'b4', ref: 'LF-2025-004', checkIn: '2025-03-05', checkOut: '2025-03-12', resort: 'r4', agent: 'a2', status: 'in_stay' as const },
+    { id: 'b1', ref: 'LF-2025-001', dayOffset: 0, resort: 'r1', agent: 'a1', status: 'confirmed' as const },
+    { id: 'b2', ref: 'LF-2025-002', dayOffset: 2, resort: 'r2', agent: 'a2', status: 'quote' as const },
+    { id: 'b3', ref: 'LF-2025-003', dayOffset: 1, resort: 'r3', agent: 'a1', status: 'pre_arrival' as const },
+    { id: 'b4', ref: 'LF-2025-004', dayOffset: 3, resort: 'r4', agent: 'a2', status: 'in_stay' as const },
   ]
 
   for (const b of bookings) {
-    const ci = new Date(b.checkIn + 'T14:00:00')
-    const co = new Date(b.checkOut + 'T11:00:00')
+    const checkInDate = new Date(startDate.getTime() + b.dayOffset * dayMs)
+    const checkOutDate = new Date(startDate.getTime() + (b.dayOffset + 7) * dayMs)
+    const ci = new Date(checkInDate)
+    ci.setHours(14, 0, 0, 0)
+    const co = new Date(checkOutDate)
+    co.setHours(11, 0, 0, 0)
     if (ci >= startDate && ci <= endDate) {
       events.push({
         id: `ev-checkin-${b.id}`,
@@ -84,13 +91,14 @@ function buildMockEvents(start: string, end: string): CalendarEvent[] {
         agent: MOCK_AGENTS.find((a) => a.id === b.agent) ?? undefined,
       })
     }
-    const payDue = new Date('2025-03-10T17:00:00')
-    if (payDue >= startDate && payDue <= endDate && b.id === 'b3') {
+    const payDueDate = new Date(startDate.getTime() + b.dayOffset * dayMs)
+    payDueDate.setHours(17, 0, 0, 0)
+    if (payDueDate >= startDate && payDueDate <= endDate && b.id === 'b3') {
       events.push({
         id: `ev-deadline-${b.id}-pay`,
         type: 'deadline',
-        start_at: payDue.toISOString(),
-        end_at: payDue.toISOString(),
+        start_at: payDueDate.toISOString(),
+        end_at: payDueDate.toISOString(),
         booking_id: b.id,
         agent_id: b.agent,
         status: 'pending',
@@ -101,22 +109,31 @@ function buildMockEvents(start: string, end: string): CalendarEvent[] {
     }
   }
 
+  const taskDayOffset = Math.min(2, Math.max(0, Math.floor(rangeMs / dayMs) - 1))
+  const taskDate = new Date(startDate.getTime() + taskDayOffset * dayMs)
+  taskDate.setHours(9, 0, 0, 0)
+  const taskEnd = new Date(taskDate.getTime() + 60 * 60 * 1000)
   events.push({
     id: 'ev-task-1',
     type: 'task',
-    start_at: new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().replace('T00:00', 'T09:00'),
-    end_at: new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().replace('T00:00', 'T10:00'),
+    start_at: taskDate.toISOString(),
+    end_at: taskEnd.toISOString(),
     agent_id: 'a1',
     status: 'pending',
     title: 'Client call - Villa Serenity',
     agent: MOCK_AGENTS[0],
   })
 
+  const blockDayOffset = Math.min(1, Math.max(0, Math.floor(rangeMs / dayMs) - 2))
+  const blockStart = new Date(startDate.getTime() + blockDayOffset * dayMs)
+  blockStart.setHours(14, 0, 0, 0)
+  const blockEnd = new Date(blockStart.getTime() + 2 * dayMs)
+  blockEnd.setHours(11, 0, 0, 0)
   events.push({
     id: 'ev-room-1',
     type: 'room_block',
-    start_at: new Date(startDate.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString().replace('T00:00', 'T14:00'),
-    end_at: new Date(startDate.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().replace('T00:00', 'T11:00'),
+    start_at: blockStart.toISOString(),
+    end_at: blockEnd.toISOString(),
     room_id: 'rm1',
     resort_id: 'r1',
     status: 'confirmed',

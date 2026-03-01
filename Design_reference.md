@@ -326,67 +326,61 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-typography, spacing, color palette, and interactive states align with guidelines
-- [ ] Performance: calendar renders efficiently with virtualized lists and debounced filters
-
-## UI/UX Guidelines
-Apply the project's design system:
-- Ensure typography, spacing, and color usage match the LuxeFlow visual style
-- Implement hover, focus, and active states with the olive accent color
-- Use subtle shadows and rounded corners for cards
-- Maintain a clean, uncluttered calendar with clear visual hierarchy
+- Maintain a clean, luxurious aesthetic with the specified color palette, typography, spacing, and card treatments.
+- Use olive green accent for primary actions; ensure hover states and focus rings are present and accessible.
+- Maintain generous whitespace, clear hierarchy, and subtle dividers for visual separation.
+- Ensure responsive behavior: calendar remains usable on tablets and mobile with a collapsible header and simplified interactions.
 
 ---
 
 ## Visual Style
 
-### Color Palette:
-- Primary: Crisp white (#FFFFFF)
-- Accent: Rich olive green (#8A9A5B)
-- Neutrals: Warm light gray (#F6F6F6, #EEEEEE)
-- Text: Deep charcoal (#222222)
-- Secondary: Gray (#888888)
-- Supporting: Soft gold (#C6AB62)
-- Imagery: Luxury photography with warm tones
+### Color Palette
+- Primary: #FFFFFF
+- Accent: #8A9A5B
+- Neutrals: #F6F6F6, #EEEEEE
+- Text: #222222
+- Secondary Text: #888888
+- Gold: #C6AB62
 
-### Typography & Layout:
-- Headings: Elegant serif (Playfair Display, Georgia)
-- Body/UI: Sans-serif (Lato, Helvetica Neue)
-- Hierarchy: Large headlines, clear subheads, readable body
-- Spacing: Generous padding, ample whitespace
-- Alignment: Left content; center-aligned headers/callouts
-- Treatments: Uppercase section labels; italicized quotes
+### Typography & Layout
+- Headings: Playfair Display or Georgia
+- Body: Lato or Helvetica Neue
+- Spacing: Generous—ample whitespace between sections
+- Alignment: Left content; centered headers for key callouts
+- Special Treatments: Uppercase section labels; italics for quotes
 
 ### Key Design Elements
-- Card Design: White cards with subtle shadows, 4-8px radius
-- Dividers: Thin light gray lines
-- Hover States: Subtle elevate/shadow with accent border
-- Visual Hierarchy: Prominent event headings and clear secondary details
-
-#### Navigation:
-- Top navigation with logo and minimal menu
-- Sticky header with fade on scroll
-- Active states indicated by accent underlines
-- Responsive behavior with collapsible menu
-
-#### Data Visualization:
-- Minimalist, not chart-heavy; focus on data clarity
-
-#### Interactive Elements:
-- Buttons: Olive green with white text
-- Forms: White fields, light borders, clear focus state
-- Dropdowns: Simple styling
-- Micro-interactions: Subtle transitions and feedback
+- Card Design: White cards, subtle box-shadow, 4-8px radius; dividers; hover lift
+- Navigation: Sticky header with subtle fade; active states with accent underline
+- Data Visualization: Minimal charts if used, otherwise clean data blocks
+- Interactive Elements: Olive green buttons with white text; clear focus states; smooth transitions
 
 ### Design Philosophy
-- Luxury, modern, minimal yet opulent
-- Clean, airy layouts; legibility and calm professionalism
-- Clarity, generous spacing, visual balance
-- Premium, trustworthy, efficient UX suited for fast-paced operations
+- Luxurious, modern, minimal, with clear emphasis on readability, calm professionalism, and speed of operations.
 
 ---
 
-**Note on Implementation Discipline (CRITICAL):** All code generated must strictly guard against null/undefined values when dealing with arrays and API responses, follow the runtime safety rules listed above, and initialize state with proper defaults. Use data ?? [] for potential null results, validate with Array.isArray checks, and always initialize useState with appropriate array/object defaults. Ensure all API interactions are resilient to missing fields and nested data.
+### Mandatory Coding Standards — Runtime Safety
+
+CRITICAL: Follow these rules in ALL generated code to prevent runtime crashes.
+
+1. Supabase query results: Always use nullish coalescing — const items = data ?? [].
+2. Array methods: Guard calls to .map(), .filter(), .reduce(), etc. with (items ?? []) or Array.isArray checks.
+3. useState defaults: Initialize arrays with correct types, e.g., useState<CalendarEvent[]>([]).
+4. API responses: Validate shapes — const list = Array.isArray(response?.data) ? response.data : [].
+5. Optional chaining: Use obj?.property?.nestedAccess for nested API results.
+6. Destructuring with defaults: const { items = [], count = 0 } = response ?? {}.
+
+---
+
+PROJECT CONTEXT RECAP
+- TARGET PAGE: Calendar / Week View
+- Core focus: Interactive week calendar displaying check-ins, check-outs, deadlines, tasks, and room blocks; filters by agent/resort/status; drag-to-reschedule with validation; popover details; quick Booking Detail access; Google Calendar / iCal sync and iCal export.
+- Connected: Calendar Sync & Scheduling with one-way/two-way sync and iCal exports.
+- Design system: LuxeFlow visual and interaction guidelines applied across all components.
+
+Generate the complete, detailed development prompt now so an AI development tool can implement this feature end-to-end.
 
 ## Implementation Notes
 

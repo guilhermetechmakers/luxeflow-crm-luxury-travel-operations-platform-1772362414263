@@ -112,18 +112,20 @@ export function EventDetailDialog({
                 Export iCal
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 min-w-[100px]"
-              onClick={() => {
-                onEditEvent?.(event)
-                onOpenChange(false)
-              }}
-            >
-              <Edit3 className="h-3.5 w-3.5 mr-1.5" />
-              Edit
-            </Button>
+            {onEditEvent && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 min-w-[100px]"
+                onClick={() => {
+                  onEditEvent(event)
+                  onOpenChange(false)
+                }}
+              >
+                <Edit3 className="h-3.5 w-3.5 mr-1.5" />
+                Edit
+              </Button>
+            )}
             {event.status !== 'completed' && (
               <Button
                 variant="outline"

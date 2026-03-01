@@ -1,6 +1,7 @@
 /**
  * DragContext - Handles drag operations with validation
  * Provides drag state and validation to child components
+ * Shows ConflictDialog for schedule conflicts per spec
  */
 import {
   createContext,
@@ -12,6 +13,7 @@ import {
 } from 'react'
 import { toast } from 'sonner'
 import { validateRescheduleDrop } from '@/lib/calendar-utils'
+import { ConflictDialog } from './conflict-dialog'
 import type { CalendarEvent, DragSettings } from '@/types/calendar'
 
 export interface DragContextValue {
@@ -23,7 +25,7 @@ export interface DragContextValue {
   validateDrop: (
     event: CalendarEvent,
     slot: { date: string; hour: number; minute: number }
-  ) => { valid: boolean; message?: string }
+  ) => { valid: boolean; message?: string; conflictingEvent?: CalendarEvent }
 }
 
 const DragContext = createContext<DragContextValue | null>(null)
@@ -50,13 +52,17 @@ export function DragContextProvider({
     isValidDrop: boolean
     message: string | null
   }>({ event: null, isValidDrop: true, message: null })
+  const [conflictDialog, setConflictDialog] = useState<{
+    open: boolean
+    message: string
+    conflictingEventTitle?: string
+  }>({ open: false, message: '' })
 
   const validateDrop = useCallback(
     (
       event: CalendarEvent,
       slot: { date: string; hour: number; minute: number }
-    ): { valid: boolean; message?: string } =>
-      validateRescheduleDrop(event, slot, events ?? [], dragSettings),
+    ) => validateRescheduleDrop(event, slot, events ?? [], dragSettings),
     [dragSettings, events]
   )
 
@@ -79,7 +85,15 @@ export function DragContextProvider({
       }
       const result = validateDrop(event, slot)
       if (!result.valid) {
-        toast.error(result.message ?? 'Cannot reschedule')
+        if (result.conflictingEvent) {
+          setConflictDialog({
+            open: true,
+            message: result.message ?? 'This time slot conflicts with another event.',
+            conflictingEventTitle: result.conflictingEvent.title,
+          })
+        } else {
+          toast.error(result.message ?? 'Cannot reschedule')
+        }
         return
       }
       const start = new Date(event.start_at)
@@ -115,7 +129,19 @@ export function DragContextProvider({
     [draggingEventId, dragState, onDragStart, onDragEnd, onSlotDrop, validateDrop]
   )
 
-  return <DragContext.Provider value={value}>{children}</DragContext.Provider>
+  return (
+    <DragContext.Provider value={value}>
+      {children}
+      <ConflictDialog
+        open={conflictDialog.open}
+        onOpenChange={(open) =>
+          setConflictDialog((prev) => ({ ...prev, open }))
+        }
+        message={conflictDialog.message}
+        conflictingEventTitle={conflictDialog.conflictingEventTitle}
+      />
+    </DragContext.Provider>
+  )
 }
 
 export function useDragContext(): DragContextValue {

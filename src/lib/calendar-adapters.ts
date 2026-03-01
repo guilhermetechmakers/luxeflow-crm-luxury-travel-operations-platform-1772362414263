@@ -8,7 +8,8 @@ import type { CalendarEvent, CalendarEventType, CalendarEventStatus } from '@/ty
 /** Normalize raw API response to CalendarEventsResponse shape */
 export function normalizeEventsResponse(raw: unknown): { events: CalendarEvent[]; count: number } {
   const data = raw as Partial<{ events?: unknown[]; count?: number }> | null | undefined
-  const events = Array.isArray(data?.events) ? data.events : []
+  const rawEvents = Array.isArray(data?.events) ? data.events : []
+  const events = mapToCalendarEvents(rawEvents)
   const count = typeof data?.count === 'number' ? data.count : events.length
   return { events, count }
 }

@@ -132,7 +132,7 @@ export function validateRescheduleDrop(
   slot: { date: string; hour: number; minute: number },
   events: CalendarEvent[],
   dragSettings: DragSettings
-): { valid: boolean; message?: string } {
+): { valid: boolean; message?: string; conflictingEvent?: CalendarEvent } {
   if (!dragSettings.canReschedule) {
     return { valid: false, message: 'You do not have permission to reschedule' }
   }
@@ -157,7 +157,8 @@ export function validateRescheduleDrop(
   if (hasConflict) {
     return {
       valid: false,
-      message: `Conflicts with ${conflictingEvent?.title ?? 'another event'}. Please choose a different time.`,
+      message: 'This time slot conflicts with another event. Please choose a different time.',
+      conflictingEvent: conflictingEvent ?? undefined,
     }
   }
   return { valid: true }

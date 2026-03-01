@@ -1,4 +1,5 @@
 export { BookingDetailLink } from './booking-detail-link'
+export { ConflictDialog } from './conflict-dialog'
 export { EventCard } from './event-card'
 /** EventBlock - alias for EventCard (spec naming) */
 export { EventCard as EventBlock } from './event-card'
