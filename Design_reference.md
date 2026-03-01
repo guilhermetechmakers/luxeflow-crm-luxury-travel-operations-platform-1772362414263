@@ -326,52 +326,67 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-- Color Palette:
-  - Primary: White (#FFFFFF)
-  - Accent: Olive Green (#8A9A5B)
-  - Neutrals: #F6F6F6, #EEEEEE
-  - Text: #222222; secondary #888888
-  - Gold: #C6AB62
-  - Imagery: Luxury, warm-toned photography
-- Typography & Layout:
-  - Headings: Elegant serif (Playfair Display, Georgia)
-  - Body: Sans-serif (Lato, Helvetica Neue)
-  - Alignment: Left content; center headers for callouts
-  - Spacing: Generous; clear blocks
-- Key Design Elements:
-  - Cards: White with subtle shadows; 4-8px radius; dividers; hover lift
-  - Navigation: Sticky header; active states with accent underline
-  - Data Visualization: Minimalist; no heavy charts
-  - Interactive elements: Olive green buttons; focus states; subtle shadows
-- Design Philosophy:
-  - Luxury, modern, minimal; clarity, calm professionalism; premium yet usable
-  - Generous whitespace; visually balanced; minimal noise
-  - Premium experience with trustworthy, efficient operations
+typography, spacing, color palette, and interactive states align with guidelines
+- [ ] Performance: calendar renders efficiently with virtualized lists and debounced filters
+
+## UI/UX Guidelines
+Apply the project's design system:
+- Ensure typography, spacing, and color usage match the LuxeFlow visual style
+- Implement hover, focus, and active states with the olive accent color
+- Use subtle shadows and rounded corners for cards
+- Maintain a clean, uncluttered calendar with clear visual hierarchy
 
 ---
 
-## Mandatory Coding Standards — Runtime Safety
+## Visual Style
 
-CRITICAL: Follow these rules in ALL generated code to prevent runtime crashes.
+### Color Palette:
+- Primary: Crisp white (#FFFFFF)
+- Accent: Rich olive green (#8A9A5B)
+- Neutrals: Warm light gray (#F6F6F6, #EEEEEE)
+- Text: Deep charcoal (#222222)
+- Secondary: Gray (#888888)
+- Supporting: Soft gold (#C6AB62)
+- Imagery: Luxury photography with warm tones
 
-1. Supabase/query results: Always use nullish coalescing — const items = data ?? [].
-2. Array methods: Never call on a value that could be null/undefined or non-array. Guard with (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : [].
-3. React useState for arrays/objects: Initialize with correct type, e.g., useState<Type[]>([]) for arrays; never use useState() or useState(null) for arrays.
-4. API response shapes: Validate — const list = Array.isArray(response?.data) ? response.data : [].
-5. Optional chaining: Use obj?.property?.nested when accessing nested API data.
-6. Destructuring with defaults: const { items = [], count = 0 } = response ?? {}.
+### Typography & Layout:
+- Headings: Elegant serif (Playfair Display, Georgia)
+- Body/UI: Sans-serif (Lato, Helvetica Neue)
+- Hierarchy: Large headlines, clear subheads, readable body
+- Spacing: Generous padding, ample whitespace
+- Alignment: Left content; center-aligned headers/callouts
+- Treatments: Uppercase section labels; italicized quotes
+
+### Key Design Elements
+- Card Design: White cards with subtle shadows, 4-8px radius
+- Dividers: Thin light gray lines
+- Hover States: Subtle elevate/shadow with accent border
+- Visual Hierarchy: Prominent event headings and clear secondary details
+
+#### Navigation:
+- Top navigation with logo and minimal menu
+- Sticky header with fade on scroll
+- Active states indicated by accent underlines
+- Responsive behavior with collapsible menu
+
+#### Data Visualization:
+- Minimalist, not chart-heavy; focus on data clarity
+
+#### Interactive Elements:
+- Buttons: Olive green with white text
+- Forms: White fields, light borders, clear focus state
+- Dropdowns: Simple styling
+- Micro-interactions: Subtle transitions and feedback
+
+### Design Philosophy
+- Luxury, modern, minimal yet opulent
+- Clean, airy layouts; legibility and calm professionalism
+- Clarity, generous spacing, visual balance
+- Premium, trustworthy, efficient UX suited for fast-paced operations
 
 ---
 
-PROJECT CONTEXT SUMMARY
-TARGET PAGE: Booking Create / Edit Wizard
-- Step-by-step flow from client selection to booking confirmation, with automated checks.
-- Connected to Booking Lifecycle & Booking Management: timeline, payments, attachments, handoffs.
-- Asset: Proposal & Handover Templates (DOCX/PDF) generated from booking data.
-- Page: Booking Detail with full lifecycle, itinerary, room, rates, commissions, payments, deadlines, references, attachments, internal notes, approvals.
-- API-driven, permission-controlled, data-rich, and designed to be deliverable as MVP with strong UX and high leverage integrations.
-
-Your task is to generate a complete, production-ready prompt for an AI development tool to implement this feature set, ensuring runtime safety rules are strictly enforced.
+**Note on Implementation Discipline (CRITICAL):** All code generated must strictly guard against null/undefined values when dealing with arrays and API responses, follow the runtime safety rules listed above, and initialize state with proper defaults. Use data ?? [] for potential null results, validate with Array.isArray checks, and always initialize useState with appropriate array/object defaults. Ensure all API interactions are resilient to missing fields and nested data.
 
 ## Implementation Notes
 

@@ -87,3 +87,22 @@ export interface CalendarEventsResponse {
   events: CalendarEvent[]
   count?: number
 }
+
+export interface DragSettings {
+  /** Event types that support drag-to-reschedule */
+  reschedulableTypes: CalendarEventType[]
+  /** Whether current user can reschedule */
+  canReschedule: boolean
+}
+
+export type ResourceType = 'room' | 'agent' | 'resort'
+
+export interface DragState {
+  eventId: string | null
+  event: CalendarEvent | null
+  startX: number
+  startY: number
+  currentSlot: { date: string; hour: number; minute: number } | null
+  isValidDrop: boolean
+  validationMessage: string | null
+}

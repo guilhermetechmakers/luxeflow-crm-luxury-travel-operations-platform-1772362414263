@@ -1,0 +1,122 @@
+/**
+ * EventCard - Type-based event blocks with drag handle when allowed
+ * Variants: CheckIn, CheckOut, Deadline, Task, RoomBlock
+ */
+import { useCallback } from 'react'
+import { GripVertical, LogIn, LogOut, Clock, CheckSquare, Bed } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import type { CalendarEvent, CalendarEventType } from '@/types/calendar'
+
+const EVENT_STYLES: Record<
+  CalendarEventType,
+  { bg: string; border: string; icon: typeof LogIn }
+> = {
+  checkin: {
+    bg: 'bg-primary/10',
+    border: 'border-l-4 border-l-primary',
+    icon: LogIn,
+  },
+  checkout: {
+    bg: 'bg-amber-50',
+    border: 'border-l-4 border-l-amber-500',
+    icon: LogOut,
+  },
+  deadline: {
+    bg: 'bg-amber-100',
+    border: 'border-l-4 border-l-amber-500',
+    icon: Clock,
+  },
+  task: {
+    bg: 'bg-slate-100',
+    border: 'border-l-4 border-l-slate-500',
+    icon: CheckSquare,
+  },
+  room_block: {
+    bg: 'bg-violet-100',
+    border: 'border-l-4 border-l-violet-500',
+    icon: Bed,
+  },
+}
+
+function formatTime(iso: string): string {
+  try {
+    const d = new Date(iso)
+    return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+  } catch {
+    return ''
+  }
+}
+
+export interface EventCardProps {
+  event: CalendarEvent
+  isDraggable?: boolean
+  isDragging?: boolean
+  onClick?: (event: CalendarEvent) => void
+  onDragStart?: (event: CalendarEvent, e: React.DragEvent) => void
+}
+
+export function EventCard({
+  event,
+  isDraggable = false,
+  isDragging = false,
+  onClick,
+  onDragStart,
+}: EventCardProps) {
+  const style = EVENT_STYLES[event.type] ?? EVENT_STYLES.task
+  const Icon = style.icon
+
+  const handleDragStart = useCallback(
+    (e: React.DragEvent) => {
+      if (!isDraggable || !onDragStart) return
+      e.dataTransfer.setData('application/json', JSON.stringify({ eventId: event.id, event }))
+      e.dataTransfer.effectAllowed = 'move'
+      onDragStart(event, e)
+    },
+    [event, isDraggable, onDragStart]
+  )
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      draggable={isDraggable}
+      onDragStart={handleDragStart}
+      onClick={() => onClick?.(event)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick?.(event)
+        }
+      }}
+      className={cn(
+        'group relative flex items-start gap-2 rounded-lg px-2 py-1.5 text-left transition-all duration-200',
+        'hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+        style.bg,
+        style.border,
+        isDragging && 'opacity-50 scale-95',
+        'cursor-pointer'
+      )}
+      aria-label={`${event.title} at ${formatTime(event.start_at)}`}
+    >
+      {isDraggable && (
+        <div
+          className="absolute left-0.5 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-70"
+          aria-hidden
+        >
+          <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+        </div>
+      )}
+      <Icon className="h-3.5 w-3.5 shrink-0 mt-0.5 text-foreground/70" />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium text-foreground">{event.title}</div>
+        <div className="text-xs text-muted-foreground">
+          {formatTime(event.start_at)}
+          {event.end_at && event.end_at !== event.start_at && ` – ${formatTime(event.end_at)}`}
+        </div>
+        {event.booking?.reference && (
+          <div className="text-xs text-muted-foreground truncate">{event.booking.reference}</div>
+        )}
+      </div>
+    </div>
+  )
+}
