@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { ensureArray } from '@/lib/resort-utils'
-import type { Resort } from '@/types/resort'
+import { ensureArray } from '@/lib/resort-bible-utils'
+import type { Resort } from '@/types/resort-bible'
 
 const MAPPING_OPTIONS = [
   { source: 'name', target: 'name' },

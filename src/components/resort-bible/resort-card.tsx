@@ -13,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import { ensureArray } from '@/lib/resort-utils'
-import type { Resort } from '@/types/resort'
+import { ensureArray } from '@/lib/resort-bible-utils'
+import type { Resort } from '@/types/resort-bible'
 
 export interface ResortCardProps {
   resort: Resort
@@ -137,7 +137,7 @@ export function ResortCard({
                   {tags.slice(0, 4).map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full bg-luxe-accent/20 px-2 py-0.5 text-xs text-luxe-accent"
+                      className="rounded-full bg-accent/20 px-2 py-0.5 text-xs text-accent"
                     >
                       {tag}
                     </span>

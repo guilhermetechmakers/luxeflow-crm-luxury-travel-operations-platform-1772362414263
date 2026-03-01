@@ -3,8 +3,8 @@
  */
 import { ResortCard } from './resort-card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ensureArray } from '@/lib/resort-utils'
-import type { Resort } from '@/types/resort'
+import { ensureArray } from '@/lib/resort-bible-utils'
+import type { Resort } from '@/types/resort-bible'
 
 export interface ResortCardGridProps {
   resorts: Resort[]

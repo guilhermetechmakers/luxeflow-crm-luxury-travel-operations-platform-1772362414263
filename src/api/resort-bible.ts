@@ -13,6 +13,7 @@ import type {
   PresetInput,
   ResortsResponse,
   Seasonal,
+  MigrationMapItem,
 } from '@/types/resort-bible'
 import { safeArrayAccess } from '@/lib/resort-bible-utils'
 
@@ -322,7 +323,7 @@ export const resortBibleApi = {
     return { data, blob }
   },
 
-  async migrateResorts(mapping: { sourceField: string; targetField: string }[]): Promise<{ jobId: string; status: string }> {
+  async migrateResorts(mapping: MigrationMapItem[]): Promise<{ jobId: string; status: string }> {
     try {
       const res = await api.post<{ jobId: string; status: string }>('/resorts/migrate', { mapping })
       return { jobId: res?.jobId ?? `job-${Date.now()}`, status: res?.status ?? 'queued' }

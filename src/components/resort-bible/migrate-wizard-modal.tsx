@@ -13,9 +13,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { Plus, Trash2 } from 'lucide-react'
-import type { MigrationMap } from '@/types/resort-bible'
+import type { MigrationMapItem } from '@/types/resort-bible'
 
-const DEFAULT_FIELDS = [
+const DEFAULT_FIELDS: MigrationMapItem[] = [
   { sourceField: 'name', targetField: 'name' },
   { sourceField: 'city', targetField: 'location.city' },
   { sourceField: 'country', targetField: 'location.country' },
@@ -24,7 +24,7 @@ const DEFAULT_FIELDS = [
 export interface MigrateWizardModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onRun: (mapping: MigrationMap[]) => Promise<{ jobId: string; status: string }>
+  onRun: (mapping: MigrationMapItem[]) => Promise<{ jobId: string; status: string }>
 }
 
 export function MigrateWizardModal({
@@ -32,9 +32,7 @@ export function MigrateWizardModal({
   onOpenChange,
   onRun,
 }: MigrateWizardModalProps) {
-  const [mappings, setMappings] = useState<{ sourceField: string; targetField: string }[]>(
-    () => [...DEFAULT_FIELDS]
-  )
+  const [mappings, setMappings] = useState<MigrationMapItem[]>(() => [...DEFAULT_FIELDS])
   const [isRunning, setIsRunning] = useState(false)
 
   const addRow = () => {

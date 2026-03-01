@@ -133,7 +133,10 @@ export interface ResortsResponse {
   total: number
 }
 
-export interface MigrationMap {
+export interface MigrationMapItem {
   sourceField: string
   targetField: string
 }
+
+/** Array of field mappings for migration wizard */
+export type MigrationMap = MigrationMapItem[]

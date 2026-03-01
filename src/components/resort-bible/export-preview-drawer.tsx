@@ -1,11 +1,26 @@
 /**
  * ExportPreviewDrawer - Preview export data before bulk export
+ * Uses DataGridExportPreview for field mapping visibility
  */
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Download } from 'lucide-react'
-import { ensureArray } from '@/lib/resort-utils'
-import type { Resort } from '@/types/resort'
+import { ensureArray } from '@/lib/resort-bible-utils'
+import { DataGridExportPreview } from './data-grid-export-preview'
+import type { Resort } from '@/types/resort-bible'
+
+function getLocationLabel(resort: Resort): string {
+  const loc = resort?.location
+  if (!loc) return ''
+  return [loc.city, loc.region, loc.country].filter(Boolean).join(', ')
+}
+
+const EXPORT_COLUMNS = [
+  { key: 'name', header: 'Name', accessor: (r: Resort) => r.name },
+  { key: 'location', header: 'Location', render: (r: Resort) => getLocationLabel(r) },
+  { key: 'transferTime', header: 'Transfer', accessor: (r: Resort) => r.transferTime },
+  { key: 'kidsPolicy', header: 'Kids Policy', accessor: (r: Resort) => r.kidsPolicy },
+]
 
 export interface ExportPreviewDrawerProps {
   open: boolean
@@ -13,12 +28,6 @@ export interface ExportPreviewDrawerProps {
   data: Resort[]
   onExport: (format: 'csv' | 'json') => void
   isExporting?: boolean
-}
-
-function getLocationLabel(resort: Resort): string {
-  const loc = resort?.location
-  if (!loc) return ''
-  return [loc.city, loc.country].filter(Boolean).join(', ')
 }
 
 export function ExportPreviewDrawer({
@@ -40,29 +49,12 @@ export function ExportPreviewDrawer({
           <p className="text-sm text-muted-foreground">
             {list.length} resort{list.length !== 1 ? 's' : ''} will be exported.
           </p>
-          <div className="max-h-96 overflow-y-auto rounded-lg border border-border">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-secondary">
-                <tr>
-                  <th className="border-b border-border px-4 py-2 text-left font-medium">Name</th>
-                  <th className="border-b border-border px-4 py-2 text-left font-medium">Location</th>
-                </tr>
-              </thead>
-              <tbody>
-                {list.slice(0, 50).map((r) => (
-                  <tr key={r.id} className="border-b border-border last:border-0">
-                    <td className="px-4 py-2">{r.name}</td>
-                    <td className="px-4 py-2">{getLocationLabel(r)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {list.length > 50 && (
-              <p className="px-4 py-2 text-xs text-muted-foreground">
-                ... and {list.length - 50} more
-              </p>
-            )}
-          </div>
+          <DataGridExportPreview
+            data={list}
+            columns={EXPORT_COLUMNS}
+            maxRows={50}
+            emptyMessage="No resorts to export"
+          />
           <div className="flex gap-2">
             <Button
               size="sm"

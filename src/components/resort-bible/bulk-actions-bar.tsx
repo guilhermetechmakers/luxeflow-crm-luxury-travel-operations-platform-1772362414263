@@ -1,13 +1,14 @@
 /**
  * BulkActionsBar - Import, Export, Sync Partners, Run Migration, Apply Presets
+ * Always visible; shows selection count and clear when items selected
  */
 import { Download, Upload, RefreshCw, Database, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 export interface BulkActionsBarProps {
-  selectedIds: string[]
-  onClearSelection: () => void
+  selectedIds?: string[]
+  onClearSelection?: () => void
   onImport?: () => void
   onExport?: () => void
   onSyncPartners?: () => void
@@ -17,7 +18,7 @@ export interface BulkActionsBarProps {
 }
 
 export function BulkActionsBar({
-  selectedIds,
+  selectedIds = [],
   onClearSelection,
   onImport,
   onExport,
@@ -26,21 +27,35 @@ export function BulkActionsBar({
   onApplyPresets,
   className,
 }: BulkActionsBarProps) {
-  const count = selectedIds?.length ?? 0
-  if (count === 0) return null
+  const count = (selectedIds ?? []).length
 
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center gap-3 rounded-lg border border-accent/30 bg-accent/5 px-4 py-2',
+        'flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-4 py-2 shadow-card transition-all duration-200',
+        count > 0 && 'border-accent/30 bg-accent/5',
         className
       )}
       role="region"
       aria-label="Bulk actions"
     >
-      <span className="text-sm font-medium text-foreground">{count} selected</span>
+      {count > 0 && (
+        <>
+          <span className="text-sm font-medium text-foreground">{count} selected</span>
+          {onClearSelection && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClearSelection}
+              aria-label="Clear selection"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </>
+      )}
       {onExport && (
-        <Button variant="outline" size="sm" onClick={onExport} aria-label="Export selected">
+        <Button variant="outline" size="sm" onClick={onExport} aria-label="Export resorts">
           <Download className="mr-2 h-4 w-4" />
           Export CSV
         </Button>
@@ -68,14 +83,6 @@ export function BulkActionsBar({
           Apply Presets
         </Button>
       )}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onClearSelection}
-        aria-label="Clear selection"
-      >
-        <X className="h-4 w-4" />
-      </Button>
     </div>
   )
 }

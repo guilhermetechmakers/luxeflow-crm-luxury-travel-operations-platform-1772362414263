@@ -25,7 +25,7 @@ import {
   MigrateWizardModal,
   ImportExportPanel,
 } from '@/components/resort-bible'
-import type { ResortFilters, ResortCreateInput } from '@/types/resort-bible'
+import type { ResortFilters, ResortCreateInput, MigrationMapItem } from '@/types/resort-bible'
 import { ensureArray } from '@/lib/resort-bible-utils'
 
 const DEFAULT_PAGE_SIZE = 24
@@ -147,7 +147,7 @@ export function ResortBibleDirectory() {
   )
 
   const handleRunMigration = useCallback(
-    async (mapping: { sourceField: string; targetField: string }[]) => {
+    async (mapping: MigrationMapItem[]) => {
       return resortBibleApi.migrateResorts(mapping)
     },
     []
