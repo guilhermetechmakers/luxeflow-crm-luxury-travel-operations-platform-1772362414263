@@ -24,8 +24,9 @@ import {
   ExportPreviewDrawer,
   MigrateWizardModal,
   ImportExportPanel,
+  ResortDetailPreviewModal,
 } from '@/components/resort-bible'
-import type { ResortFilters, ResortCreateInput, MigrationMapItem } from '@/types/resort-bible'
+import type { Resort, ResortFilters, ResortCreateInput, MigrationMapItem } from '@/types/resort-bible'
 import { ensureArray } from '@/lib/resort-bible-utils'
 
 const DEFAULT_PAGE_SIZE = 24
@@ -41,6 +42,7 @@ export function ResortBibleDirectory() {
   const [exportPreviewOpen, setExportPreviewOpen] = useState(false)
   const [migrateOpen, setMigrateOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
+  const [quickViewResort, setQuickViewResort] = useState<Resort | null>(null)
 
   const effectiveFilters = useMemo<ResortFilters>(
     () => ({ ...filters, search: debouncedSearch.trim() || undefined }),
@@ -257,6 +259,7 @@ export function ResortBibleDirectory() {
                 onToggleSelectAll={toggleAll}
                 showCheckboxes={selectedIds.length > 0 || isSomeSelected(resortIds)}
                 viewMode={viewMode}
+                onQuickView={(resort: Resort) => setQuickViewResort(resort)}
                 onAddToShortlist={(id) => toast.info(`Added ${id} to shortlist`)}
                 onCompare={(id) => toast.info(`Compare ${id}`)}
                 onExport={(id) => toast.info(`Export ${id}`)}
@@ -315,6 +318,12 @@ export function ResortBibleDirectory() {
         open={importOpen}
         onOpenChange={setImportOpen}
         onImport={handleImport}
+      />
+
+      <ResortDetailPreviewModal
+        resort={quickViewResort}
+        open={quickViewResort != null}
+        onOpenChange={(open) => !open && setQuickViewResort(null)}
       />
     </div>
   )

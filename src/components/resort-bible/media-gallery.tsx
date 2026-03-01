@@ -1,8 +1,9 @@
 /**
  * MediaGallery - Resort images/videos with lightbox, captions, lazy loading
+ * Supports both image and video types per MediaItem
  */
 import { useState, useCallback, useEffect } from 'react'
-import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Play } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -77,34 +78,53 @@ export function MediaGallery({ items, resortName = '', className }: MediaGallery
         role="list"
         aria-label={`Media gallery for ${resortName}`}
       >
-        {media.map((m, index) => (
-          <button
-            key={m.id}
-            type="button"
-            className="group relative aspect-video overflow-hidden rounded-lg bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            onClick={() => openLightbox(index)}
-            aria-label={m.caption ?? `View image ${index + 1}`}
-          >
-            <img
-              src={m.url}
-              alt={m.caption ?? m.type ?? `Resort image ${index + 1}`}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              loading="lazy"
-              decoding="async"
-            />
-            {m.caption && (
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                <p className="text-left text-xs text-white line-clamp-2">{m.caption}</p>
-              </div>
-            )}
-          </button>
-        ))}
+        {media.map((m, index) => {
+          const isVideo = (m.type ?? 'image') === 'video'
+          return (
+            <button
+              key={m.id}
+              type="button"
+              className="group relative aspect-video overflow-hidden rounded-lg bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              onClick={() => openLightbox(index)}
+              aria-label={m.caption ?? `View ${isVideo ? 'video' : 'image'} ${index + 1}`}
+            >
+              {isVideo ? (
+                <>
+                  <video
+                    src={m.url}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    muted
+                    playsInline
+                    preload="metadata"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                    <Play className="h-12 w-12 text-white drop-shadow-lg" aria-hidden />
+                  </div>
+                </>
+              ) : (
+                <img
+                  src={m.url}
+                  alt={m.caption ?? m.type ?? `Resort image ${index + 1}`}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              {m.caption && (
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                  <p className="text-left text-xs text-white line-clamp-2">{m.caption}</p>
+                </div>
+              )}
+            </button>
+          )
+        })}
       </div>
 
       <Dialog open={lightboxIndex != null} onOpenChange={(open) => !open && closeLightbox()}>
         <DialogContent className="max-w-4xl border-0 bg-black/95 p-0" showClose={false}>
           <DialogTitle className="sr-only">
-            {currentItem?.caption ?? `Image ${(lightboxIndex ?? 0) + 1} of ${media.length}`}
+            {currentItem?.caption ??
+              `${(currentItem?.type ?? 'image') === 'video' ? 'Video' : 'Image'} ${(lightboxIndex ?? 0) + 1} of ${media.length}`}
           </DialogTitle>
           {currentItem && (
             <div className="relative">
@@ -117,11 +137,21 @@ export function MediaGallery({ items, resortName = '', className }: MediaGallery
               >
                 <X className="h-5 w-5" />
               </Button>
-              <img
-                src={currentItem.url}
-                alt={currentItem.caption ?? 'Resort image'}
-                className="max-h-[85vh] w-full object-contain"
-              />
+              {(currentItem.type ?? 'image') === 'video' ? (
+                <video
+                  src={currentItem.url}
+                  className="max-h-[85vh] w-full object-contain"
+                  controls
+                  autoPlay
+                  playsInline
+                />
+              ) : (
+                <img
+                  src={currentItem.url}
+                  alt={currentItem.caption ?? 'Resort image'}
+                  className="max-h-[85vh] w-full object-contain"
+                />
+              )}
               {currentItem.caption && (
                 <p className="p-4 text-center text-sm text-white">
                   {currentItem.caption}
@@ -134,7 +164,7 @@ export function MediaGallery({ items, resortName = '', className }: MediaGallery
                     size="icon"
                     className="text-white hover:bg-white/20"
                     onClick={goPrev}
-                    aria-label="Previous image"
+                    aria-label="Previous"
                   >
                     <ChevronLeft className="h-6 w-6" />
                   </Button>
@@ -147,7 +177,7 @@ export function MediaGallery({ items, resortName = '', className }: MediaGallery
                     size="icon"
                     className="text-white hover:bg-white/20"
                     onClick={goNext}
-                    aria-label="Next image"
+                    aria-label="Next"
                   >
                     <ChevronRight className="h-6 w-6" />
                   </Button>

@@ -1,12 +1,13 @@
 /**
  * ResortDetail - Full resort profile with all sections
  * Overview, Rooms, Perks & Policies, Media, Contacts, Internal Notes
+ * Tab state persisted in URL for shareable links
  * Runtime safety: all arrays guarded with ensureArray
  */
-import { useParams, Link } from 'react-router-dom'
+import { useMemo } from 'react'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { resortBibleApi } from '@/api/resort-bible'
-import { MapPin, Clock, Users, Utensils } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import * as Tabs from '@radix-ui/react-tabs'
@@ -15,43 +16,15 @@ import { ensureArray } from '@/lib/resort-bible-utils'
 import {
   ResortHeader,
   MediaGallery,
+  MediaGalleryInlineEditor,
   ResortRoomsTable,
   ResortPoliciesPanel,
   ContactsList,
   InternalNotesPanel,
   ResortLoadingSkeleton,
+  OverviewCard,
+  ResortBibleDirectorySearchWidget,
 } from '@/components/resort-bible'
-import type { Resort, DiningOption } from '@/types/resort-bible'
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-function formatSeasonality(
-  seasonality: { startMonth: number; endMonth: number; notes?: string }[]
-): string {
-  if (!seasonality?.length) return '—'
-  return seasonality
-    .map((s) => {
-      const range = `${MONTHS[s.startMonth - 1]}–${MONTHS[s.endMonth - 1]}`
-      return s.notes ? `${range} (${s.notes})` : range
-    })
-    .join('; ')
-}
-
-function normalizeDining(dining: Resort['dining']): string[] {
-  if (!dining) return []
-  if (Array.isArray(dining)) {
-    const first = dining[0]
-    if (typeof first === 'string') return dining as string[]
-    return (dining as DiningOption[]).flatMap((d) => d.options ?? [])
-  }
-  return []
-}
-
-function getLocationLabel(resort: Resort): string {
-  const loc = resort?.location
-  if (!loc) return ''
-  return [loc.city, loc.region, loc.country].filter(Boolean).join(', ')
-}
 
 const TAB_ITEMS = [
   { value: 'overview', label: 'Overview' },
@@ -62,18 +35,36 @@ const TAB_ITEMS = [
   { value: 'internal-notes', label: 'Internal Notes' },
 ] as const
 
+const TAB_VALUES = TAB_ITEMS.map((t) => t.value)
+
 export function ResortDetail() {
   const { id } = useParams<{ id: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { resort, isLoading, refetch } = useResortDetail(id ?? undefined)
+
+  const activeTab = useMemo((): (typeof TAB_ITEMS)[number]['value'] => {
+    const tab = searchParams.get('tab')
+    const valid = TAB_VALUES.find((v) => v === tab)
+    return (valid ?? 'overview') as (typeof TAB_ITEMS)[number]['value']
+  }, [searchParams])
+
+  const setActiveTab = (value: (typeof TAB_ITEMS)[number]['value']) => {
+    const tab = TAB_VALUES.includes(value) ? value : 'overview'
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (tab === 'overview') {
+        next.delete('tab')
+      } else {
+        next.set('tab', tab)
+      }
+      return next
+    })
+  }
 
   const media = ensureArray(resort?.media)
   const roomTypes = ensureArray(resort?.roomTypes)
-  const seasonality = ensureArray(resort?.seasonality)
-  const dining = normalizeDining(resort?.dining)
-  const perks = ensureArray(resort?.perks)
   const ratings = ensureArray(resort?.internalRatings)
   const panelNotes = ensureArray(resort?.panelNotes)
-  const locationLabel = resort ? getLocationLabel(resort) : ''
 
   if (!id) {
     return (
@@ -107,15 +98,29 @@ export function ResortDetail() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <ResortHeader resort={resort} />
+      <ResortHeader
+        resort={resort}
+        onCheckAvailability={() => toast.info('Check availability coming soon')}
+        onRequestQuote={() => toast.info('Request quote coming soon')}
+      />
 
-      <div className="relative h-64 overflow-hidden rounded-lg bg-secondary">
+      <div className="relative h-64 overflow-hidden rounded-lg bg-secondary transition-shadow hover:shadow-card">
         {media[0]?.url ? (
-          <img
-            src={media[0].url}
-            alt={media[0].caption ?? resort.name}
-            className="h-full w-full object-cover"
-          />
+          (media[0].type ?? 'image') === 'video' ? (
+            <video
+              src={media[0].url}
+              className="h-full w-full object-cover"
+              muted
+              playsInline
+              preload="metadata"
+            />
+          ) : (
+            <img
+              src={media[0].url}
+              alt={media[0].caption ?? resort.name}
+              className="h-full w-full object-cover"
+            />
+          )
         ) : (
           <div className="flex h-full w-full items-center justify-center text-6xl font-serif text-muted-foreground">
             {resort.name?.charAt(0) ?? '?'}
@@ -123,7 +128,11 @@ export function ResortDetail() {
         )}
       </div>
 
-      <Tabs.Root defaultValue="overview" className="space-y-4">
+      <Tabs.Root
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as (typeof TAB_ITEMS)[number]['value'])}
+        className="space-y-4"
+      >
         <Tabs.List
           className="flex flex-wrap gap-2 border-b border-border"
           role="tablist"
@@ -135,7 +144,7 @@ export function ResortDetail() {
               value={tab.value}
               className="border-b-2 border-transparent px-4 py-2 text-sm font-medium transition-colors hover:text-foreground data-[state=active]:border-accent data-[state=active]:text-accent"
               role="tab"
-              aria-selected={tab.value === 'overview'}
+              aria-selected={activeTab === tab.value}
             >
               {tab.label}
             </Tabs.Trigger>
@@ -143,127 +152,22 @@ export function ResortDetail() {
         </Tabs.List>
 
         <Tabs.Content value="overview">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Location
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-muted-foreground">{locationLabel}</p>
-                {resort.location?.region && (
-                  <p className="text-sm text-muted-foreground">Region: {resort.location.region}</p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Transfer time
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {Array.isArray(resort.transferTimes)
-                    ? resort.transferTimes.join('; ')
-                    : resort.transferTime ?? '—'}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Kids policy
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">{resort.kidsPolicy ?? '—'}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                <Utensils className="h-5 w-5" />
-                Dining
-              </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {dining.length === 0 ? (
-                  <p className="text-muted-foreground">—</p>
-                ) : (
-                  <ul className="list-disc space-y-1 pl-4 text-muted-foreground" role="list">
-                    {dining.map((d, i) => (
-                      <li key={i}>{d}</li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <OverviewCard
+                resort={resort}
+                onCheckAvailability={() => toast.info('Check availability coming soon')}
+                onProposeItinerary={() => toast.info('Propose itinerary coming soon')}
+                onCreateTask={() => toast.info('Create task coming soon')}
+              />
+            </div>
+            <div className="lg:col-span-1">
+              <ResortBibleDirectorySearchWidget
+                excludeResortId={resort.id}
+                maxResults={6}
+              />
+            </div>
           </div>
-
-          {seasonality.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Seasonality</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">{formatSeasonality(seasonality)}</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {perks.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Perks & inclusions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-disc space-y-1 pl-4 text-muted-foreground" role="list">
-                  {perks.map((p) => (
-                    <li key={p}>{p}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          {resort.restrictions && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Restrictions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {Array.isArray(resort.restrictions)
-                    ? resort.restrictions.join('; ')
-                    : resort.restrictions}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {ratings.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Internal rating</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {(
-                    ratings.reduce((a, r) => a + (r?.rating ?? 0), 0) / ratings.length
-                  ).toFixed(1)}{' '}
-                  / 5 ({ratings.length} rating{ratings.length !== 1 ? 's' : ''})
-                </p>
-              </CardContent>
-            </Card>
-          )}
         </Tabs.Content>
 
         <Tabs.Content value="rooms">
@@ -278,12 +182,26 @@ export function ResortDetail() {
         </Tabs.Content>
 
         <Tabs.Content value="media">
-          <Card>
+          <Card className="transition-shadow duration-300 hover:shadow-card-hover">
             <CardHeader>
               <CardTitle>Media gallery</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <MediaGallery items={media} resortName={resort.name} />
+              <MediaGalleryInlineEditor
+                items={media}
+                resortName={resort.name}
+                canEdit
+                onItemsChange={async (next) => {
+                  try {
+                    await resortBibleApi.updateResort(resort.id, { media: next })
+                    toast.success('Media updated')
+                    refetch()
+                  } catch {
+                    toast.error('Failed to update media')
+                  }
+                }}
+              />
             </CardContent>
           </Card>
         </Tabs.Content>

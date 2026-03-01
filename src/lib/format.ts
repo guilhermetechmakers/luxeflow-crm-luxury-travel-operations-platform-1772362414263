@@ -22,6 +22,32 @@ export function formatShortDate(dateStr: string | null | undefined): string {
   return d.toLocaleDateString('en-EU', { day: 'numeric', month: 'short' })
 }
 
+/** Format time for chat (HH:mm) */
+export function formatTime(iso: string | null | undefined): string {
+  if (!iso || typeof iso !== 'string') return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+}
+
+/** Relative time for chat (e.g. "2m ago", "Yesterday") */
+export function formatTimeAgo(iso: string | null | undefined): string {
+  if (!iso || typeof iso !== 'string') return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const now = new Date()
+  const diffMs = now.getTime() - d.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+  if (diffMins < 1) return 'Just now'
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays}d ago`
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
 export function getPriorityColor(priority: string): string {
   switch (priority?.toLowerCase()) {
     case 'urgent':

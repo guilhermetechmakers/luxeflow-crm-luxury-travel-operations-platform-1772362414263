@@ -64,13 +64,25 @@ export function ImportExportPanel({
     }
   }
 
+  const isJsonFile = (name: string) =>
+    name.toLowerCase().endsWith('.json')
+
   const handlePreview = useCallback(async () => {
     if (!file) return
     setIsLoading(true)
     try {
-      const res = await onImport(file, mapping)
-      setPreview(ensureArray(res?.preview))
-      setStep('preview')
+      if (isJsonFile(file.name)) {
+        const text = await file.text()
+        const parsed = JSON.parse(text) as unknown
+        const arr = Array.isArray(parsed) ? parsed : (parsed as { data?: unknown[] })?.data
+        const items = Array.isArray(arr) ? arr : []
+        setPreview(items as Resort[])
+        setStep('preview')
+      } else {
+        const res = await onImport(file, mapping)
+        setPreview(ensureArray(res?.preview))
+        setStep('preview')
+      }
     } catch {
       toast.error('Failed to parse file')
     } finally {
@@ -109,19 +121,19 @@ export function ImportExportPanel({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Import resorts (CSV)</DialogTitle>
+          <DialogTitle>Import resorts (CSV/JSON)</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           {step === 'upload' ? (
             <>
               <div>
-                <Label>CSV file</Label>
+                <Label>CSV or JSON file</Label>
                 <div className="mt-2 flex items-center gap-2">
                   <Input
                     type="file"
-                    accept=".csv"
+                    accept=".csv,.json"
                     onChange={handleFileChange}
-                    aria-label="Select CSV file"
+                    aria-label="Select CSV or JSON file"
                   />
                   {file && (
                     <span className="text-sm text-muted-foreground">{file.name}</span>

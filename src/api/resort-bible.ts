@@ -21,7 +21,7 @@ const MOCK_RESORTS: Resort[] = [
   {
     id: 'r1',
     name: 'Villa Serenity',
-    location: { city: 'Santorini', country: 'Greece', region: 'Cyclades' },
+    location: { city: 'Santorini', country: 'Greece', region: 'Cyclades', coordinates: { lat: 36.3932, lng: 25.4615 } },
     transferTime: '45 min',
     transferTimes: ['45 min from Santorini Airport'],
     kidsPolicy: 'All ages welcome',
@@ -72,7 +72,7 @@ const MOCK_RESORTS: Resort[] = [
   {
     id: 'r2',
     name: 'Ocean View Resort',
-    location: { city: 'Santorini', country: 'Greece', region: 'Cyclades' },
+    location: { city: 'Santorini', country: 'Greece', region: 'Cyclades', coordinates: { lat: 36.4194, lng: 25.4322 } },
     transferTime: '25 min',
     transferTimes: ['25 min from airport'],
     kidsPolicy: '12+ only',
@@ -93,7 +93,7 @@ const MOCK_RESORTS: Resort[] = [
   {
     id: 'r3',
     name: 'Mountain Lodge',
-    location: { city: 'Zermatt', country: 'Switzerland', region: 'Swiss Alps' },
+    location: { city: 'Zermatt', country: 'Switzerland', region: 'Swiss Alps', coordinates: { lat: 45.9763, lng: 7.6586 } },
     transferTime: '90 min',
     kidsPolicy: 'All ages welcome',
     dining: ['Half board', 'Full board'],
@@ -115,7 +115,7 @@ const MOCK_RESORTS: Resort[] = [
   {
     id: 'r4',
     name: 'Château des Alpes',
-    location: { city: 'Chamonix', country: 'France', region: 'Haute-Savoie' },
+    location: { city: 'Chamonix', country: 'France', region: 'Haute-Savoie', coordinates: { lat: 45.9237, lng: 6.8694 } },
     transferTime: '60 min',
     kidsPolicy: 'All ages welcome',
     dining: ['Breakfast', 'Dinner'],
@@ -135,7 +135,7 @@ const MOCK_RESORTS: Resort[] = [
   {
     id: 'r5',
     name: 'Palazzo Riviera',
-    location: { city: 'Amalfi', country: 'Italy', region: 'Campania' },
+    location: { city: 'Amalfi', country: 'Italy', region: 'Campania', coordinates: { lat: 40.6340, lng: 14.6027 } },
     transferTime: '35 min',
     kidsPolicy: 'All ages welcome',
     dining: ['Breakfast', 'À la carte'],

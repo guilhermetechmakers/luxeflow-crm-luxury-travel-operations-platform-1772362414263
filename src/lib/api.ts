@@ -54,3 +54,18 @@ export const api = {
   delete: <T>(endpoint: string) =>
     apiFetch<T>(endpoint, { method: 'DELETE' }),
 }
+
+/**
+ * Safe fetch - returns null on error instead of throwing.
+ * Use for optional/critical paths where fallback is acceptable.
+ */
+export async function safeFetch<T>(
+  url: string,
+  options?: RequestInit
+): Promise<T | null> {
+  try {
+    return await apiFetch<T>(url, options ?? {})
+  } catch {
+    return null
+  }
+}

@@ -15,6 +15,7 @@ export interface ResortCardGridProps {
   onAddToShortlist?: (id: string) => void
   onCompare?: (id: string) => void
   onExport?: (id: string) => void
+  onQuickView?: (resort: Resort) => void
   showCheckboxes?: boolean
   viewMode?: 'grid' | 'list'
 }
@@ -44,6 +45,7 @@ export function ResortCardGrid({
   onAddToShortlist,
   onCompare,
   onExport,
+  onQuickView,
   showCheckboxes,
   viewMode = 'grid',
 }: ResortCardGridProps) {
@@ -97,6 +99,7 @@ export function ResortCardGrid({
           onAddToShortlist={onAddToShortlist}
           onCompare={onCompare}
           onExport={onExport}
+          onQuickView={onQuickView ? () => onQuickView(resort) : undefined}
           showCheckbox={showCheckboxes}
           className={viewMode === 'list' ? 'flex flex-row' : undefined}
         />

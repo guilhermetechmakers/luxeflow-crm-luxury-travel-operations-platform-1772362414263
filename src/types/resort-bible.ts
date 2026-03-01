@@ -32,10 +32,13 @@ export interface RoomType {
   maxOccupancy?: number
   bedConfig?: string
   image?: string
+  images?: string[]
   occupancy?: RoomOccupancy
   rateSample?: number
+  sampleRate?: number
   is2Bedroom?: boolean
   description?: string
+  amenities?: string[]
 }
 
 /** Supplier/partner contact with full details */
@@ -85,6 +88,7 @@ export interface PartnerRef {
   email?: string
   phone?: string
   notes?: string
+  perks?: string[]
 }
 
 /** Dining option with optional hours and notes */
@@ -92,6 +96,16 @@ export interface DiningOption {
   options?: string[]
   hours?: string[]
   notes?: string
+}
+
+/** Dining venue with name, hours, and notes (Resort Detail spec) */
+export interface DiningSection {
+  id: string
+  name: string
+  hours?: string
+  notes?: string
+  dressCode?: string
+  capacity?: string
 }
 
 export interface Resort {
@@ -102,7 +116,7 @@ export interface Resort {
   /** Legacy: single transfer time string; also supports transferTimes[] */
   transferTimes?: string[]
   kidsPolicy?: string
-  dining?: string[] | DiningOption[]
+  dining?: string[] | DiningOption[] | DiningSection[]
   seasonality?: Seasonal[]
   roomTypes?: RoomType[]
   media?: MediaItem[]

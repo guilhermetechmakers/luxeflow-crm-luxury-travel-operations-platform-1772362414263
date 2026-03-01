@@ -2,7 +2,7 @@
  * ResortCard - Thumbnail, name, location, attributes, rating, partner badges, quick actions
  */
 import { Link } from 'react-router-dom'
-import { Eye, GitCompare, Star, Download } from 'lucide-react'
+import { Eye, GitCompare, Star, Download, ZoomIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -23,6 +23,7 @@ export interface ResortCardProps {
   onAddToShortlist?: (id: string) => void
   onCompare?: (id: string) => void
   onExport?: (id: string) => void
+  onQuickView?: (resort: Resort) => void
   showCheckbox?: boolean
   className?: string
 }
@@ -48,6 +49,7 @@ export function ResortCard({
   onAddToShortlist,
   onCompare,
   onExport,
+  onQuickView,
   showCheckbox,
   className,
 }: ResortCardProps) {
@@ -148,12 +150,29 @@ export function ResortCard({
           </Link>
         </div>
         <div className="flex items-center justify-between border-t border-border px-4 py-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to={`/dashboard/resorts/${resort.id}`} aria-label={`View ${resort.name}`}>
-              <Eye className="h-4 w-4" />
-              View
-            </Link>
-          </Button>
+          <div className="flex gap-1">
+            {onQuickView && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onQuickView(resort)
+                }}
+                aria-label={`Quick view ${resort.name}`}
+              >
+                <ZoomIn className="h-4 w-4" />
+                Quick view
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" asChild>
+              <Link to={`/dashboard/resorts/${resort.id}`} aria-label={`View ${resort.name}`}>
+                <Eye className="h-4 w-4" />
+                View
+              </Link>
+            </Button>
+          </div>
           <div className="flex gap-1">
             {onCompare && (
               <Button
