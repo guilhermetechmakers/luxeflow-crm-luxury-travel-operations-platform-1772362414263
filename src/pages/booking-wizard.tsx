@@ -1,6 +1,7 @@
 /**
  * BookingCreateEditWizard - Full 7-step booking creation/editing wizard
  * Client, Resort & Room, Rates, Payment Schedule, Itinerary, Attachments, Review
+ * Sticky header, progress bar, Save Draft at any step
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom'
@@ -17,6 +18,7 @@ import {
   ItineraryEditorStep,
   AttachmentsAndSuppliers,
   ReviewAndActions,
+  WizardConflictsChecker,
 } from '@/components/booking-wizard'
 import { validateStep, canSaveAsQuote, canConfirmBooking } from '@/lib/booking-wizard-validation'
 import { cn } from '@/lib/utils'
@@ -58,6 +60,7 @@ export function BookingWizard() {
   const [step, setStep] = useState(0)
   const [draft, setDraft] = useState<BookingDraft>(defaultDraft)
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoadingEdit, setIsLoadingEdit] = useState(!!(mode === 'edit' && id))
 
   useEffect(() => {
     if (clientIdFromUrl && !draft.client?.id) {
@@ -86,56 +89,60 @@ export function BookingWizard() {
 
   useEffect(() => {
     if (mode === 'edit' && id) {
-      bookingsApi.getBookingDetail(id).then((detail) => {
-        if (detail) {
-          setDraft({
-            id: detail.id,
-            client: detail.client
-              ? {
-                  id: detail.client.id,
-                  firstName: detail.client.name.split(' ')[0] ?? '',
-                  lastName: detail.client.name.split(' ').slice(1).join(' ') ?? '',
-                }
-              : null,
-            resort: detail.resort
-              ? {
-                  id: detail.resort.id,
-                  name: detail.resort.name,
-                  location: detail.resort.location,
-                  transfer_time_minutes: detail.resort.transfer_time_minutes,
-                }
-              : null,
-            room_category: detail.room_category ?? null,
-            check_in: detail.check_in ?? '',
-            check_out: detail.check_out ?? '',
-            rate_plan: (detail.rates ?? [])[0] ?? null,
-            commission_model: detail.commission ?? null,
-            payment_schedule: (detail.payments ?? []).map((p) => ({
-              id: p.id,
-              milestone: p.milestone,
-              due_date: p.due_date,
-              amount: p.amount,
-              currency: p.currency,
-              status: p.status,
-            })),
-            itinerary: detail.itinerary ?? [],
-            attachments: (detail.attachments ?? []).map((a) => ({
-              id: a.id,
-              filename: a.filename,
-              url: a.url,
-              type: a.type,
-            })),
-            supplier_references: (detail.supplier_references ?? []).map((s) => ({
-              id: s.id,
-              supplier_name: s.supplier_name ?? '',
-              reference_code: s.reference_numbers,
-              contact: s.contact,
-              notes: '',
-            })),
-            currency: detail.currency ?? 'EUR',
-          })
-        }
-      })
+      setIsLoadingEdit(true)
+      bookingsApi
+        .getBookingDetail(id)
+        .then((detail) => {
+          if (detail) {
+            setDraft({
+              id: detail.id,
+              client: detail.client
+                ? {
+                    id: detail.client.id,
+                    firstName: detail.client.name.split(' ')[0] ?? '',
+                    lastName: detail.client.name.split(' ').slice(1).join(' ') ?? '',
+                  }
+                : null,
+              resort: detail.resort
+                ? {
+                    id: detail.resort.id,
+                    name: detail.resort.name,
+                    location: detail.resort.location,
+                    transfer_time_minutes: detail.resort.transfer_time_minutes,
+                  }
+                : null,
+              room_category: detail.room_category ?? null,
+              check_in: detail.check_in ?? '',
+              check_out: detail.check_out ?? '',
+              rate_plan: (detail.rates ?? [])[0] ?? null,
+              commission_model: detail.commission ?? null,
+              payment_schedule: (detail.payments ?? []).map((p) => ({
+                id: p.id,
+                milestone: p.milestone,
+                due_date: p.due_date,
+                amount: p.amount,
+                currency: p.currency,
+                status: p.status,
+              })),
+              itinerary: detail.itinerary ?? [],
+              attachments: (detail.attachments ?? []).map((a) => ({
+                id: a.id,
+                filename: a.filename,
+                url: a.url,
+                type: a.type,
+              })),
+              supplier_references: (detail.supplier_references ?? []).map((s) => ({
+                id: s.id,
+                supplier_name: s.supplier_name ?? '',
+                reference_code: s.reference_numbers,
+                contact: s.contact,
+                notes: '',
+              })),
+              currency: detail.currency ?? 'EUR',
+            })
+          }
+        })
+        .finally(() => setIsLoadingEdit(false))
     }
   }, [mode, id])
 
@@ -246,39 +253,76 @@ export function BookingWizard() {
     }
   }, [draft, mode, id, savePayload, navigate, queryClient])
 
-  return (
-    <div className="mx-auto max-w-3xl space-y-6 animate-fade-in">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Go back">
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-        </Button>
-        <div>
-          <h1 className="font-serif text-3xl font-semibold">
-            {mode === 'edit' ? 'Edit Booking' : 'New Booking'}
-          </h1>
-          <p className="text-muted-foreground">
-            Step {step + 1} of {STEPS.length}
-          </p>
+  if (isLoadingEdit) {
+    return (
+      <div className="mx-auto max-w-3xl animate-fade-in">
+        <div className="flex items-center justify-center py-24">
+          <div className="h-10 w-10 animate-pulse rounded-full bg-accent/30" aria-hidden />
         </div>
       </div>
+    )
+  }
 
-      <div
-        className="flex gap-1"
-        role="progressbar"
-        aria-valuenow={step + 1}
-        aria-valuemin={1}
-        aria-valuemax={STEPS.length}
-        aria-label="Wizard progress"
-      >
-        {STEPS.map((_, i) => (
-          <div
-            key={i}
-            className={cn(
-              'h-1 flex-1 rounded-full transition-colors duration-300',
-              i <= step ? 'bg-accent' : 'bg-secondary'
-            )}
-          />
-        ))}
+  return (
+    <div className="mx-auto max-w-3xl space-y-6 animate-fade-in">
+      {/* Sticky header with progress */}
+      <div className="sticky top-0 z-10 -mx-6 -mt-6 flex flex-col gap-4 border-b border-border bg-background/95 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBack}
+            aria-label={step === 0 ? 'Cancel and go back' : 'Go back'}
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+          </Button>
+          <div className="min-w-0 flex-1">
+            <h1 className="font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+              {mode === 'edit' ? 'Edit Booking' : 'New Booking'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Step {step + 1} of {STEPS.length} · {STEPS[step]}
+            </p>
+          </div>
+        </div>
+
+        <div
+          className="flex gap-1"
+          role="progressbar"
+          aria-valuenow={step + 1}
+          aria-valuemin={1}
+          aria-valuemax={STEPS.length}
+          aria-label="Wizard progress"
+        >
+          {STEPS.map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                'h-1.5 flex-1 rounded-full transition-all duration-300',
+                i < step ? 'bg-accent' : i === step ? 'bg-accent/70' : 'bg-secondary'
+              )}
+            />
+          ))}
+        </div>
+
+        {/* Mobile: step labels */}
+        <div className="flex overflow-x-auto gap-2 pb-1 md:hidden">
+          {(STEPS ?? []).map((label, i) => (
+            <span
+              key={i}
+              className={cn(
+                'shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors',
+                i === step
+                  ? 'bg-accent text-accent-foreground'
+                  : i < step
+                    ? 'bg-accent/20 text-accent'
+                    : 'bg-secondary text-muted-foreground'
+              )}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -327,7 +371,9 @@ export function BookingWizard() {
         )}
 
         {step === 3 && (
-          <PaymentScheduleEditor
+          <>
+            <WizardConflictsChecker draft={draft} />
+            <PaymentScheduleEditor
             checkIn={draft.check_in}
             checkOut={draft.check_out}
             totalAmount={draft.rate_plan?.amount ?? 0}
@@ -336,6 +382,7 @@ export function BookingWizard() {
             onChange={(schedule) => setDraft((prev) => ({ ...prev, payment_schedule: schedule }))}
             errors={stepErrorMessages}
           />
+          </>
         )}
 
         {step === 4 && (
@@ -374,20 +421,25 @@ export function BookingWizard() {
       </div>
 
       {step < 6 && (
-        <div className="flex justify-between border-t border-border pt-6">
-          <Button variant="outline" onClick={handleBack}>
+        <div className="flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:justify-between">
+          <Button variant="outline" onClick={handleBack} className="w-full sm:w-auto">
             {step === 0 ? 'Cancel' : 'Back'}
           </Button>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
             <Button
               variant="outline"
               onClick={handleSaveDraft}
               disabled={isSaving}
+              className="w-full sm:w-auto"
             >
               <Save className="h-4 w-4" aria-hidden />
               Save Draft
             </Button>
-            <Button onClick={handleNext}>
+            <Button
+              onClick={handleNext}
+              disabled={currentErrors.length > 0}
+              className="w-full transition-all duration-200 hover:scale-[1.02] hover:shadow-md sm:w-auto"
+            >
               {step === STEPS.length - 2 ? 'Review' : 'Next'}
               {step === STEPS.length - 2 ? (
                 <Check className="h-4 w-4" aria-hidden />
