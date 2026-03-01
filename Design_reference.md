@@ -326,61 +326,67 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-- Maintain a clean, luxurious aesthetic with the specified color palette, typography, spacing, and card treatments.
-- Use olive green accent for primary actions; ensure hover states and focus rings are present and accessible.
-- Maintain generous whitespace, clear hierarchy, and subtle dividers for visual separation.
-- Ensure responsive behavior: calendar remains usable on tablets and mobile with a collapsible header and simplified interactions.
+- Fidelity to luxury, minimalism, and clarity
+- Spacing, typography, and color guidelines as specified
+- Accessible components with keyboard navigation and screen reader labels
+- Subtle hover states, focus rings, and efficient micro-interactions
+- Clear visual hierarchy: task title first, then contextual details, then actions
 
 ---
 
 ## Visual Style
 
-### Color Palette
+### Color Palette:
 - Primary: #FFFFFF
 - Accent: #8A9A5B
 - Neutrals: #F6F6F6, #EEEEEE
-- Text: #222222
-- Secondary Text: #888888
-- Gold: #C6AB62
+- Text: #222222; secondary text #888888
+- Supporting: #C6AB62
+- Imagery: warm, sunlit photography
 
-### Typography & Layout
-- Headings: Playfair Display or Georgia
-- Body: Lato or Helvetica Neue
-- Spacing: Generous—ample whitespace between sections
-- Alignment: Left content; centered headers for key callouts
-- Special Treatments: Uppercase section labels; italics for quotes
+### Typography & Layout:
+- Headings: Playfair Display / Georgia
+- Body: Lato / Helvetica Neue
+- Hierarchy: large headlines, subtle subheadings, legible body text
+- Spacing: generous padding and whitespace
+- Alignment: left content; center headers when appropriate
+- Treatments: uppercase section labels; italic quotes/testimonials
 
 ### Key Design Elements
-- Card Design: White cards, subtle box-shadow, 4-8px radius; dividers; hover lift
-- Navigation: Sticky header with subtle fade; active states with accent underline
-- Data Visualization: Minimal charts if used, otherwise clean data blocks
-- Interactive Elements: Olive green buttons with white text; clear focus states; smooth transitions
+- Card Design: white cards, soft shadows, 4-8px radius; dividers; hover lift
+- Navigation: sticky header, active states, responsive nav
+- Data Visualization: minimal, clean, unobtrusive
+- Interactive Elements: olive-green buttons, white inputs with light borders, accessible components
 
 ### Design Philosophy
-- Luxurious, modern, minimal, with clear emphasis on readability, calm professionalism, and speed of operations.
+- Luxury, calm, efficient UX
+- Clear, uncluttered layouts with generous spacing
+- Premium feel while enabling fast-paced operations
 
 ---
 
-### Mandatory Coding Standards — Runtime Safety
+## Mandatory Coding Standards — Runtime Safety
 
-CRITICAL: Follow these rules in ALL generated code to prevent runtime crashes.
-
-1. Supabase query results: Always use nullish coalescing — const items = data ?? [].
-2. Array methods: Guard calls to .map(), .filter(), .reduce(), etc. with (items ?? []) or Array.isArray checks.
-3. useState defaults: Initialize arrays with correct types, e.g., useState<CalendarEvent[]>([]).
-4. API responses: Validate shapes — const list = Array.isArray(response?.data) ? response.data : [].
-5. Optional chaining: Use obj?.property?.nestedAccess for nested API results.
-6. Destructuring with defaults: const { items = [], count = 0 } = response ?? {}.
+CRITICAL: Implement all code with runtime safety in mind:
+- Use data ?? [] for results where applicable
+- Guard array operations: (items ?? []).map(...); Array.isArray(items) ? items.map(...) : []
+- Initialize arrays with correct defaults: useState<Type[]>([])
+- Validate API responses: const list = Array.isArray(response?.data) ? response.data : []
+- Use optional chaining for nested API data: obj?.property?.nested
+- Destructure with defaults: const { items = [], count = 0 } = response ?? {}
 
 ---
 
-PROJECT CONTEXT RECAP
-- TARGET PAGE: Calendar / Week View
-- Core focus: Interactive week calendar displaying check-ins, check-outs, deadlines, tasks, and room blocks; filters by agent/resort/status; drag-to-reschedule with validation; popover details; quick Booking Detail access; Google Calendar / iCal sync and iCal export.
-- Connected: Calendar Sync & Scheduling with one-way/two-way sync and iCal exports.
-- Design system: LuxeFlow visual and interaction guidelines applied across all components.
+## Additional Notes for AI Development Tool
 
-Generate the complete, detailed development prompt now so an AI development tool can implement this feature end-to-end.
+- Generate modular, testable code with strong type definitions (TypeScript)
+- Provide unit tests for critical paths: task creation from template, automation rule evaluation, reminder dispatch
+- Include comprehensive API schema and example payloads in code comments
+- Include feature flags toggleable via config for experimental automation rules or notifications
+- Ensure the module respects multi-tenant data isolation and org-scoped data fetching
+- Document data mapping rules for how booking/client contexts map into task templates
+
+If you need a starter repository outline, a JSON-based API contract, or a mock data generator for tasks, I can provide those as well.
 
 ## Implementation Notes
 
