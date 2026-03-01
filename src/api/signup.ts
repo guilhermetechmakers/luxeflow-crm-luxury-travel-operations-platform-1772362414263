@@ -34,6 +34,10 @@ export interface SignupResponse {
 export async function signupOrgAdmin(payload: SignupPayload): Promise<SignupResponse> {
   const { adminEmail, adminPassword, adminName, orgName } = payload
 
+  const redirectTo = typeof window !== 'undefined'
+    ? `${window.location.origin}/verify-email`
+    : undefined
+
   const { data, error } = await supabase.auth.signUp({
     email: adminEmail,
     password: adminPassword,
@@ -44,6 +48,7 @@ export async function signupOrgAdmin(payload: SignupPayload): Promise<SignupResp
         plan_id: payload.planId,
         invites: Array.isArray(payload.invites) ? payload.invites : [],
       },
+      emailRedirectTo: redirectTo,
     },
   })
 

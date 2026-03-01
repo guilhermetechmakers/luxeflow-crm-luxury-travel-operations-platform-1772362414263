@@ -60,3 +60,26 @@ export interface RequestPasswordResetResponse {
 export interface ResetPasswordResponse {
   message: string
 }
+
+/** Email verification status */
+export type VerificationStatus = 'pending' | 'verified' | 'failed'
+
+/** Onboarding step for NextStepsChecklist */
+export interface OnboardingStep {
+  id: string
+  label: string
+  completed?: boolean
+}
+
+/** API response for verification status */
+export interface VerificationStatusResponse {
+  status: VerificationStatus
+  steps?: OnboardingStep[]
+}
+
+/** API response for resend verification */
+export interface ResendVerificationResponse {
+  success: boolean
+  message?: string
+  nextRetrySeconds?: number
+}

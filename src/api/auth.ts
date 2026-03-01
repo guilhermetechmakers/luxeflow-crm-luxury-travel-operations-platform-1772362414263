@@ -102,4 +102,69 @@ export const authApi = {
     const { data } = await supabase.auth.getSession()
     return !!(data?.session)
   },
+
+  /**
+   * Get email verification status. Uses Supabase user's email_confirmed_at.
+   * Returns status, email, and optional onboarding steps.
+   */
+  async getVerificationStatus(): Promise<{
+    status: 'pending' | 'verified' | 'failed'
+    email?: string
+    steps?: Array<{ id: string; label: string; completed: boolean }>
+  }> {
+    try {
+      const { data, error } = await supabase.auth.getUser()
+      if (error) {
+        return { status: 'failed' }
+      }
+      const user = data?.user ?? null
+      if (!user) {
+        return { status: 'pending' }
+      }
+      const email = user.email ?? ''
+      const isVerified = !!user.email_confirmed_at
+      const steps = [
+        { id: 'profile', label: 'Complete Profile', completed: !!user.user_metadata?.full_name },
+        { id: 'team', label: 'Invite Team', completed: false },
+      ]
+      return {
+        status: isVerified ? 'verified' : 'pending',
+        email,
+        steps,
+      }
+    } catch {
+      return { status: 'failed' }
+    }
+  },
+
+  /**
+   * Resend verification email. Uses Supabase auth.resend with type 'signup'.
+   * Rate limiting is enforced by Supabase; client should implement cooldown.
+   */
+  async resendVerificationEmail(email: string): Promise<{
+    success: boolean
+    message?: string
+    nextRetrySeconds?: number
+  }> {
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return { success: false, message: 'Valid email is required' }
+    }
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+      })
+      if (error) {
+        const msg = error.message ?? 'Failed to resend verification email'
+        const nextRetrySeconds = msg.toLowerCase().includes('rate')
+          ? 60
+          : undefined
+        return { success: false, message: msg, nextRetrySeconds }
+      }
+      return { success: true, message: 'Verification email sent' }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to resend'
+      return { success: false, message }
+    }
+  },
 }
