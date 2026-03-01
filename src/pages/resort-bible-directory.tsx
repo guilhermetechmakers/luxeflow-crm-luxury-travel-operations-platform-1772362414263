@@ -74,7 +74,11 @@ export function ResortBibleDirectory() {
         effectiveFilters.location ||
         effectiveFilters.region ||
         (effectiveFilters.roomTypes ?? []).length > 0 ||
-        effectiveFilters.seasonality
+        effectiveFilters.seasonality ||
+        effectiveFilters.twoBedroomSuites ||
+        (effectiveFilters.tags ?? []).length > 0 ||
+        (effectiveFilters.perks ?? []).length > 0 ||
+        effectiveFilters.internalRatingMin != null
       ),
     [effectiveFilters]
   )

@@ -1,6 +1,5 @@
 /**
- * EmptyState - Helpful empty state with illustration, CTA
- * LuxeFlow design: minimal, premium feel
+ * EmptyState - Generic empty state with illustration, message, and CTA
  */
 import { cn } from '@/lib/utils'
 
@@ -26,18 +25,10 @@ export function EmptyState({
         className
       )}
     >
-      {icon && (
-        <div className="text-muted-foreground/50 [&>svg]:h-16 [&>svg]:w-16">
-          {icon}
-        </div>
-      )}
-      <h3 className="mt-4 font-serif text-lg font-semibold text-foreground">
-        {title}
-      </h3>
+      {icon && <div className="text-muted-foreground/50" aria-hidden>{icon}</div>}
+      <h3 className="mt-4 font-serif text-lg font-semibold">{title}</h3>
       {description && (
-        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-          {description}
-        </p>
+        <p className="mt-2 max-w-sm text-sm text-muted-foreground">{description}</p>
       )}
       {action && <div className="mt-6">{action}</div>}
     </div>

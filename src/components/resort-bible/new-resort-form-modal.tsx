@@ -1,5 +1,6 @@
 /**
  * NewResortFormModal - Add new resort with standardized fields
+ * name, location, transferTime, kidsPolicy, dining, roomTypes, seasonality, perks, tags
  */
 import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
@@ -19,6 +20,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import type { ResortCreateInput } from '@/types/resort-bible'
 
+function parseCommaList(s: string): string[] {
+  return (s ?? '')
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean)
+}
+
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
   city: z.string().min(1, 'City is required'),
@@ -27,6 +35,9 @@ const schema = z.object({
   transferTime: z.string().optional(),
   kidsPolicy: z.string().optional(),
   restrictions: z.string().optional(),
+  dining: z.string().optional(),
+  perks: z.string().optional(),
+  tags: z.string().optional(),
 })
 
 type FormData = z.infer<typeof schema>
@@ -59,12 +70,18 @@ export function NewResortFormModal({
       transferTime: '',
       kidsPolicy: '',
       restrictions: '',
+      dining: '',
+      perks: '',
+      tags: '',
     },
   })
 
   const handleFormSubmit = useCallback(
     async (data: FormData) => {
       try {
+        const diningList = parseCommaList(data.dining ?? '')
+        const perksList = parseCommaList(data.perks ?? '')
+        const tagsList = parseCommaList(data.tags ?? '')
         await onSubmit({
           name: data.name,
           location: {
@@ -75,6 +92,9 @@ export function NewResortFormModal({
           transferTime: data.transferTime || undefined,
           kidsPolicy: data.kidsPolicy || undefined,
           restrictions: data.restrictions || undefined,
+          dining: diningList.length > 0 ? diningList : undefined,
+          perks: perksList.length > 0 ? perksList : undefined,
+          tags: tagsList.length > 0 ? tagsList : undefined,
         })
         toast.success('Resort added successfully')
         reset()
@@ -89,7 +109,7 @@ export function NewResortFormModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add new resort</DialogTitle>
         </DialogHeader>
@@ -158,6 +178,33 @@ export function NewResortFormModal({
                 className="mt-1"
               />
             </div>
+          </div>
+          <div>
+            <Label htmlFor="dining">Dining (comma-separated)</Label>
+            <Input
+              id="dining"
+              {...register('dining')}
+              placeholder="e.g. Breakfast, Half board, À la carte"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="perks">Perks (comma-separated)</Label>
+            <Input
+              id="perks"
+              {...register('perks')}
+              placeholder="e.g. Spa, Pool, Airport transfer"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="tags">Tags (comma-separated)</Label>
+            <Input
+              id="tags"
+              {...register('tags')}
+              placeholder="e.g. Family, Beach, Luxury"
+              className="mt-1"
+            />
           </div>
           <div>
             <Label htmlFor="restrictions">Restrictions</Label>

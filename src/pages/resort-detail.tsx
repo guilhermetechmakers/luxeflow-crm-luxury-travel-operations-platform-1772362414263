@@ -4,13 +4,20 @@
  * partners, perks, restrictions, media gallery, supplier contacts, internal ratings
  */
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, MapPin, Clock, Users, Utensils, Star, Shield } from 'lucide-react'
+import { toast } from 'sonner'
+import { resortBibleApi } from '@/api/resort-bible'
+import { ArrowLeft, MapPin, Clock, Users, Utensils, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import * as Tabs from '@radix-ui/react-tabs'
 import { useResortDetail } from '@/hooks/use-resort-detail'
 import { ensureArray } from '@/lib/resort-utils'
+import {
+  MediaGallery,
+  PartnerBadges,
+  InternalRatingsPanel,
+  ResortLoadingSkeleton,
+} from '@/components/resort-bible'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -26,7 +33,7 @@ function formatSeasonality(seasonality: { startMonth: number; endMonth: number; 
 
 export function ResortDetail() {
   const { id } = useParams<{ id: string }>()
-  const { resort, isLoading } = useResortDetail(id ?? undefined)
+  const { resort, isLoading, refetch } = useResortDetail(id ?? undefined)
 
   const locationLabel = resort?.location
     ? [resort.location.city, resort.location.region, resort.location.country].filter(Boolean).join(', ')
@@ -38,9 +45,6 @@ export function ResortDetail() {
   const perks = ensureArray(resort?.perks)
   const partners = ensureArray(resort?.partners)
   const ratings = ensureArray(resort?.internalRatings)
-  const avgRating = ratings.length
-    ? (ratings.reduce((a, r) => a + (r?.rating ?? 0), 0) / ratings.length).toFixed(1)
-    : null
 
   if (!id) {
     return (
@@ -56,18 +60,7 @@ export function ResortDetail() {
   if (isLoading) {
     return (
       <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10 rounded-lg" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-48" />
-          </div>
-        </div>
-        <Skeleton className="h-64 w-full rounded-lg" />
-        <div className="grid gap-4 md:grid-cols-2">
-          <Skeleton className="h-48" />
-          <Skeleton className="h-48" />
-        </div>
+        <ResortLoadingSkeleton variant="detail" />
       </div>
     )
   }
@@ -85,15 +78,22 @@ export function ResortDetail() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild aria-label="Back to Resort Bible">
-          <Link to="/dashboard/resorts">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="font-serif text-3xl font-semibold">{resort.name}</h1>
-          <p className="text-muted-foreground">{locationLabel}</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" asChild aria-label="Back to Resort Bible">
+            <Link to="/dashboard/resorts">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="font-serif text-3xl font-semibold text-foreground">{resort.name}</h1>
+            <p className="mt-1 text-muted-foreground">{locationLabel}</p>
+            {partners.length > 0 && (
+              <div className="mt-3">
+                <PartnerBadges partners={partners} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -180,22 +180,17 @@ export function ResortDetail() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5" />
-                  Internal rating
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {avgRating ? `${avgRating} / 5` : '—'}
-                  {ratings.length > 0 && (
-                    <span className="ml-2 text-sm">({ratings.length} rating{ratings.length !== 1 ? 's' : ''})</span>
-                  )}
-                </p>
-              </CardContent>
-            </Card>
+            <InternalRatingsPanel
+              resortId={resort.id}
+              resortName={resort.name}
+              ratings={ratings}
+              canAddNotes
+              onAddNote={async (resortId: string, rating: number, notes: string) => {
+                await resortBibleApi.addResortNote(resortId, rating, notes)
+                toast.success('Note added')
+                refetch()
+              }}
+            />
           </div>
 
           {dining.length > 0 && (
@@ -233,20 +228,7 @@ export function ResortDetail() {
                 <CardTitle>Media gallery</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                  {media.map((m) => (
-                    <div key={m.id} className="aspect-video overflow-hidden rounded-lg bg-secondary">
-                      <img
-                        src={m.url}
-                        alt={m.caption ?? m.type ?? 'Resort image'}
-                        className="h-full w-full object-cover"
-                      />
-                      {m.caption && (
-                        <p className="mt-1 text-xs text-muted-foreground">{m.caption}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <MediaGallery items={media} resortName={resort.name} />
               </CardContent>
             </Card>
           )}
@@ -262,24 +244,6 @@ export function ResortDetail() {
             </Card>
           )}
 
-          {ratings.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Panel notes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {ratings.map((r) => (
-                    <li key={r.id} className="border-b border-border pb-2 last:border-0 last:pb-0">
-                      <span className="font-medium">{r.rating}/5</span>
-                      {r.reviewer && <span className="ml-2 text-sm text-muted-foreground">— {r.reviewer}</span>}
-                      {r.notes && <p className="mt-1 text-sm text-muted-foreground">{r.notes}</p>}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
         </Tabs.Content>
 
         <Tabs.Content value="rooms">

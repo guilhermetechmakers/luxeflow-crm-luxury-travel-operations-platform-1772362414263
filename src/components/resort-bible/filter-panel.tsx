@@ -49,6 +49,9 @@ const SEASONALITY_PRESETS = [
   { value: 'peak', label: 'Peak travel' },
 ]
 
+const COMMON_TAGS = ['Family', 'Beach', 'Luxury', 'Ski', 'Wellness', 'Cliff-top', 'Coastal', 'Wine', 'Gardens']
+const COMMON_PERKS = ['Breakfast', 'Spa', 'Pool', 'Concierge', 'Airport transfer', 'Half board', 'Full board']
+
 export interface FilterPanelProps {
   filters: ResortFilters
   onFiltersChange: (f: ResortFilters) => void
@@ -79,6 +82,7 @@ export function FilterPanel({
     basics: true,
     amenities: true,
     location: true,
+    ratings: true,
   })
 
   const toggleSection = (key: string) => {
@@ -107,6 +111,25 @@ export function FilterPanel({
   }
   const handleResortTypeChange = (v: string) => {
     onFiltersChange({ ...filters, resortType: v === 'all' ? undefined : v })
+  }
+  const handleTwoBedroomToggle = (checked: boolean) => {
+    onFiltersChange({ ...filters, twoBedroomSuites: checked ? true : undefined })
+  }
+  const handleTagToggle = (tag: string, checked: boolean) => {
+    const current = filters.tags ?? []
+    const next = checked ? [...current, tag] : current.filter((t) => t !== tag)
+    onFiltersChange({ ...filters, tags: next.length > 0 ? next : undefined })
+  }
+  const handlePerkToggle = (perk: string, checked: boolean) => {
+    const current = filters.perks ?? []
+    const next = checked ? [...current, perk] : current.filter((p) => p !== perk)
+    onFiltersChange({ ...filters, perks: next.length > 0 ? next : undefined })
+  }
+  const handleInternalRatingChange = (v: string) => {
+    onFiltersChange({
+      ...filters,
+      internalRatingMin: v === 'all' ? undefined : parseInt(v, 10),
+    })
   }
 
   const content = (
@@ -217,6 +240,17 @@ export function FilterPanel({
                     </Label>
                   </div>
                 ))}
+                <div className="flex items-center space-x-2 pt-1">
+                  <Checkbox
+                    id="two-bedroom"
+                    checked={filters.twoBedroomSuites === true}
+                    onCheckedChange={(c) => handleTwoBedroomToggle(c === true)}
+                    aria-label="2-bedroom suites only"
+                  />
+                  <Label htmlFor="two-bedroom" className="text-sm font-normal">
+                    2-bedroom suites only
+                  </Label>
+                </div>
               </div>
             </div>
             <div>
@@ -304,6 +338,88 @@ export function FilterPanel({
                   <SelectItem value="Hotel">Hotel</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <button
+          type="button"
+          onClick={() => toggleSection('ratings')}
+          className="flex w-full items-center justify-between text-sm font-medium"
+        >
+          Ratings & Tags
+          {expandedSections.ratings ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </button>
+        {expandedSections.ratings && (
+          <div className="space-y-3 pl-1">
+            <div>
+              <Label className="text-xs uppercase text-muted-foreground">Min internal rating</Label>
+              <Select
+                value={filters.internalRatingMin != null ? String(filters.internalRatingMin) : 'all'}
+                onValueChange={handleInternalRatingChange}
+              >
+                <SelectTrigger className="mt-1" aria-label="Minimum internal rating">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any</SelectItem>
+                  <SelectItem value="4">4+</SelectItem>
+                  <SelectItem value="4.5">4.5+</SelectItem>
+                  <SelectItem value="5">5</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs uppercase text-muted-foreground">Tags</Label>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {COMMON_TAGS.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={(filters.tags ?? []).includes(tag)}
+                    aria-label={`Filter by ${tag}`}
+                    className={cn(
+                      'cursor-pointer rounded-full px-2 py-1 text-xs transition-colors',
+                      (filters.tags ?? []).includes(tag)
+                        ? 'bg-accent text-accent-foreground'
+                        : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                    )}
+                    onClick={() => handleTagToggle(tag, !(filters.tags ?? []).includes(tag))}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs uppercase text-muted-foreground">Perks</Label>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {COMMON_PERKS.map((perk) => (
+                  <button
+                    key={perk}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={(filters.perks ?? []).includes(perk)}
+                    aria-label={`Filter by ${perk}`}
+                    className={cn(
+                      'cursor-pointer rounded-full px-2 py-1 text-xs transition-colors',
+                      (filters.perks ?? []).includes(perk)
+                        ? 'bg-accent text-accent-foreground'
+                        : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                    )}
+                    onClick={() => handlePerkToggle(perk, !(filters.perks ?? []).includes(perk))}
+                  >
+                    {perk}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}

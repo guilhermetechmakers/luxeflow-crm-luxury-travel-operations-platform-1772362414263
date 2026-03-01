@@ -201,6 +201,36 @@ function filterResorts(resorts: Resort[], filters: ResortFilters): Resort[] {
     })
   }
 
+  if (Array.isArray(filters.perks) && filters.perks.length > 0) {
+    result = result.filter((r) => {
+      const resortPerks = (r.perks ?? []).map((p) => (p ?? '').toLowerCase())
+      return filters.perks!.some((p) => resortPerks.includes((p ?? '').toLowerCase()))
+    })
+  }
+
+  if (filters.twoBedroomSuites === true) {
+    result = result.filter((r) => {
+      const roomTypes = (r.roomTypes ?? []).map((rt) => (rt?.name ?? '').toLowerCase())
+      return roomTypes.some(
+        (n) =>
+          n.includes('2-bedroom') ||
+          n.includes('two bedroom') ||
+          n.includes('2 bedroom') ||
+          n.includes('family suite')
+      )
+    })
+  }
+
+  if (typeof filters.internalRatingMin === 'number' && filters.internalRatingMin > 0) {
+    result = result.filter((r) => {
+      const ratings = (r.internalRatings ?? []).filter((ir) => ir != null)
+      if (ratings.length === 0) return false
+      const avg =
+        ratings.reduce((a, ir) => a + (ir?.rating ?? 0), 0) / ratings.length
+      return avg >= filters.internalRatingMin!
+    })
+  }
+
   return result
 }
 
@@ -362,6 +392,22 @@ export const resortBibleApi = {
       return { success: true }
     } catch {
       return { success: true }
+    }
+  },
+
+  async addResortNote(
+    resortId: string,
+    rating: number,
+    notes: string
+  ): Promise<{ id: string }> {
+    try {
+      const res = await api.post<{ id: string }>(`/resorts/${resortId}/notes`, {
+        rating,
+        notes,
+      })
+      return res ?? { id: `ir-${resortId}-${Date.now()}` }
+    } catch {
+      return { id: `ir-${resortId}-${Date.now()}` }
     }
   },
 }

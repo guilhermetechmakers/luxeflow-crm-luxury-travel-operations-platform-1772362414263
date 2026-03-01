@@ -97,6 +97,7 @@ export interface ResortFilters {
   transferTimeMax?: number
   beachPresence?: string
   roomTypes?: string[]
+  twoBedroomSuites?: boolean
   priceBand?: string
   priceBandMin?: number
   priceBandMax?: number
@@ -107,6 +108,7 @@ export interface ResortFilters {
   location?: string
   region?: string
   resortType?: string
+  internalRatingMin?: number
 }
 
 
