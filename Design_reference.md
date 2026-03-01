@@ -326,70 +326,52 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-- Consistent with the LuxeFlow visual language: crisp white surfaces, olive-green accents, warm neutrals, deep charcoal text, soft gold accents.
-- Cards with subtle shadows and rounded corners; dividers and clear section separation.
-- Top navigation and sticky header behavior as described; responsive behavior for mobile/tablet.
-- Data visualization is minimal; no heavy charts; emphasis on clarity and legibility.
-- Interactive elements: accessible focus states, smooth transitions, and restrained micro-interactions.
+- Color Palette:
+  - Primary: White (#FFFFFF)
+  - Accent: Olive Green (#8A9A5B)
+  - Neutrals: #F6F6F6, #EEEEEE
+  - Text: #222222; secondary #888888
+  - Gold: #C6AB62
+  - Imagery: Luxury, warm-toned photography
+- Typography & Layout:
+  - Headings: Elegant serif (Playfair Display, Georgia)
+  - Body: Sans-serif (Lato, Helvetica Neue)
+  - Alignment: Left content; center headers for callouts
+  - Spacing: Generous; clear blocks
+- Key Design Elements:
+  - Cards: White with subtle shadows; 4-8px radius; dividers; hover lift
+  - Navigation: Sticky header; active states with accent underline
+  - Data Visualization: Minimalist; no heavy charts
+  - Interactive elements: Olive green buttons; focus states; subtle shadows
+- Design Philosophy:
+  - Luxury, modern, minimal; clarity, calm professionalism; premium yet usable
+  - Generous whitespace; visually balanced; minimal noise
+  - Premium experience with trustworthy, efficient operations
 
 ---
 
-## Visual Style
+## Mandatory Coding Standards — Runtime Safety
 
-### Color Palette
-- Primary: #FFFFFF
-- Accent: #8A9A5B
-- Neutrals: #F6F6F6, #EEEEEE
-- Text: #222222, #888888
-- Supporting: #C6AB62
+CRITICAL: Follow these rules in ALL generated code to prevent runtime crashes.
 
-### Typography & Layout
-- Headings: Playfair Display or Georgia
-- Body: Lato or Helvetica Neue
-- Hierarchy: Large headlines, clear subheadings, readable body text
-- Spacing: Generous; large whitespace between sections
-- Alignment: Left-aligned content; headers/callouts center-aligned when needed
-- Special Treatments: Uppercase section labels; italics for quotes/tests where appropriate
-
-### Key Design Elements
-- Card Design: White cards, subtle shadows, 4-8px radii
-- Dividers: Thin light gray lines
-- Hover States: Subtle shadow and border highlights
-- Visual Hierarchy: Image/heading at top; clear secondary sections
-
-### Navigation
-- Top navigation: Logo and horizontal menu
-- Sticky Header: Visible while scrolling
-- Active States: Accent underline/highlight
-- Responsive: Collapsible mobile nav
-
-### Data Visualization
-- Minimalist, clean, monochrome with accent emphasis
-
-### Interactive Elements
-- Buttons: Olive-green, white text, rounded, with hover shadow
-- Forms: White fields, light gray borders, clear focus
-- Dropdowns: Simple and unobtrusive
-- Micro-interactions: Smooth transitions
+1. Supabase/query results: Always use nullish coalescing — const items = data ?? [].
+2. Array methods: Never call on a value that could be null/undefined or non-array. Guard with (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : [].
+3. React useState for arrays/objects: Initialize with correct type, e.g., useState<Type[]>([]) for arrays; never use useState() or useState(null) for arrays.
+4. API response shapes: Validate — const list = Array.isArray(response?.data) ? response.data : [].
+5. Optional chaining: Use obj?.property?.nested when accessing nested API data.
+6. Destructuring with defaults: const { items = [], count = 0 } = response ?? {}.
 
 ---
 
-## Mandatory Coding Standards — Runtime Safety (Recap)
-- Always use nullish coalescing for Supabase results: data ?? []
-- Guard all array methods with (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
-- Initialize arrays/objects with proper useState defaults: useState<Type[]>([])
-- Validate API shapes: const list = Array.isArray(response?.data) ? response.data : []
-- Use optional chaining for nested API data: obj?.prop?.nested
-- Destructure with defaults: const { items = [], count = 0 } = response ?? {}
+PROJECT CONTEXT SUMMARY
+TARGET PAGE: Booking Create / Edit Wizard
+- Step-by-step flow from client selection to booking confirmation, with automated checks.
+- Connected to Booking Lifecycle & Booking Management: timeline, payments, attachments, handoffs.
+- Asset: Proposal & Handover Templates (DOCX/PDF) generated from booking data.
+- Page: Booking Detail with full lifecycle, itinerary, room, rates, commissions, payments, deadlines, references, attachments, internal notes, approvals.
+- API-driven, permission-controlled, data-rich, and designed to be deliverable as MVP with strong UX and high leverage integrations.
 
----
-
-Notes for AI development tool:
-- Produce a single, cohesive prompt that can be fed into an AI code assistant to generate the Booking Detail module, including TypeScript types, React components, API contracts, and test stubs.
-- Include explicit guidance for null safety patterns, state initialization, and defensive programming as outlined.
-- Ensure the prompt covers all connected features (Operations Command Center, Booking Lifecycle, Booking Create/Edit Wizard, and Bookings List) as integration touchpoints.
-- Provide example data shapes and sample responses to illustrate the expected API payloads.
-- Emphasize performance, accessibility, and design system conformance throughout the generated code.
+Your task is to generate a complete, production-ready prompt for an AI development tool to implement this feature set, ensuring runtime safety rules are strictly enforced.
 
 ## Implementation Notes
 

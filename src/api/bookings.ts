@@ -22,6 +22,7 @@ import type {
   NoteDetail,
   ApprovalDetail,
   SupplierReferenceDetail,
+  BookingDraft,
 } from '@/types/booking'
 
 const MOCK_AGENTS: Agent[] = [
@@ -252,6 +253,18 @@ export const bookingsApi = {
       return normalizeBookingsResponse(res)
     } catch {
       return filterAndSortBookings(MOCK_BOOKINGS, filters)
+    }
+  },
+
+  /**
+   * POST /api/bookings - Create new booking from draft
+   */
+  async createBooking(draft: BookingDraft): Promise<BookingDetail | null> {
+    try {
+      const res = await api.post<BookingDetail>('/bookings', draft)
+      return res ?? null
+    } catch {
+      return buildMockBookingDetailFromDraft(draft)
     }
   },
 
@@ -650,5 +663,88 @@ function buildMockBookingDetail(id: string): BookingDetail | null {
     deadlines: [
       { id: 'd1', title: 'Final payment due', due_date: '2025-03-10', type: 'payment' },
     ],
+  }
+}
+
+/** Build mock BookingDetail from draft when API unavailable */
+function buildMockBookingDetailFromDraft(draft: BookingDraft): BookingDetail | null {
+  const id = `b-${Date.now()}`
+  const clientName = draft.client
+    ? ('firstName' in draft.client && 'lastName' in draft.client
+      ? `${(draft.client as { firstName?: string; lastName?: string }).firstName ?? ''} ${(draft.client as { firstName?: string; lastName?: string }).lastName ?? ''}`.trim()
+      : (draft.client as { name?: string }).name ?? '') || 'Unknown'
+    : 'Unknown'
+  const totalAmount = draft.rate_plan?.amount ?? 0
+  const outstandingBalance = Math.max(0, totalAmount - 0)
+
+  const payments: PaymentMilestone[] = (draft.payment_schedule ?? []).map((p, i) => ({
+    id: (p as { id?: string }).id ?? `p${i}`,
+    booking_id: id,
+    milestone: p.milestone ?? 'Payment',
+    due_date: p.due_date,
+    amount: p.amount,
+    currency: p.currency ?? draft.currency ?? 'EUR',
+    status: (p.status as 'paid' | 'unpaid' | 'overdue') ?? 'unpaid',
+  }))
+
+  const supplierRefs: SupplierReferenceDetail[] = (draft.supplier_references ?? []).map((s, i) => ({
+    id: (s as { id?: string }).id ?? `s${i}`,
+    booking_id: id,
+    supplier_id: (s as { id?: string }).id ?? s.supplier_name ?? `sup${i}`,
+    supplier_name: s.supplier_name,
+    reference_numbers: s.reference_code,
+    contact: s.contact,
+  }))
+
+  const attachments: AttachmentDetail[] = (draft.attachments ?? []).map((a, i) => ({
+    id: a.id ?? `att${i}`,
+    booking_id: id,
+    filename: a.filename,
+    url: a.url,
+    type: a.type,
+    uploaded_at: new Date().toISOString(),
+  }))
+
+  return {
+    id,
+    reference: `LF-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`,
+    client_id: (draft.client as { id?: string } | undefined)?.id ?? '',
+    client: { id: (draft.client as { id?: string } | undefined)?.id ?? '', name: clientName },
+    resort_id: (draft.resort as { id?: string } | undefined)?.id ?? '',
+    resort: draft.resort
+      ? {
+          id: draft.resort.id,
+          name: draft.resort.name,
+          location: draft.resort.location,
+          transfer_time_minutes: draft.resort.transfer_time_minutes,
+        }
+      : undefined,
+    room_category_id: draft.room_category?.id,
+    room_category: draft.room_category ?? undefined,
+    status: 'quote',
+    check_in: draft.check_in ?? '',
+    check_out: draft.check_out ?? '',
+    total_amount: totalAmount,
+    outstanding_balance: outstandingBalance,
+    currency: draft.currency ?? 'EUR',
+    timeline: [
+      { id: 't1', booking_id: id, stage: 'quote', timestamp: new Date().toISOString(), actor_name: 'Current User' },
+    ],
+    itinerary: draft.itinerary ?? [],
+    rates: draft.rate_plan ? [draft.rate_plan] : [],
+    commission: draft.commission_model ?? undefined,
+    payments,
+    supplier_references: supplierRefs,
+    attachments,
+    notes: [],
+    approvals: [],
+    deadlines: (draft.payment_schedule ?? [])
+      .filter((p) => p.due_date)
+      .map((p, i) => ({
+        id: `d${i}`,
+        title: p.milestone,
+        due_date: p.due_date,
+        type: 'payment',
+      })),
   }
 }

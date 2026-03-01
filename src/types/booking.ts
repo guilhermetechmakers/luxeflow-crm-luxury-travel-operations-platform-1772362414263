@@ -294,3 +294,86 @@ export interface BookingDetail {
   approvals?: ApprovalDetail[]
   deadlines?: { id: string; title: string; due_date: string; type: string }[]
 }
+
+// --- Booking Wizard / Create Edit ---
+
+export interface ResortBibleItem {
+  id: string
+  name: string
+  location?: string
+  transfer_time_minutes?: number
+  transfer_time?: string
+  kids_policy?: string
+  beach_proximity?: string
+  room_types?: RoomCategoryRef[]
+  capacity?: number
+  seasonality?: string
+  image_url?: string
+  tags?: string[]
+  inclusions?: string[]
+}
+
+export interface PaymentMilestoneInput {
+  id: string
+  milestone: string
+  due_date: string
+  amount: number
+  currency: string
+  status?: 'paid' | 'unpaid' | 'overdue'
+}
+
+export interface SupplierReferenceInput {
+  id: string
+  supplier_name: string
+  reference_code?: string
+  contact?: string
+  notes?: string
+}
+
+export interface AttachmentInput {
+  id: string
+  filename: string
+  url: string
+  type: string
+}
+
+export interface BookingDraftClient {
+  id?: string
+  name?: string
+  firstName?: string
+  lastName?: string
+  email?: string
+  phone?: string
+  vip?: boolean
+  family?: boolean
+  country?: string
+  notes?: string
+}
+
+export interface BookingDraft {
+  id?: string
+  client_id?: string
+  client?: BookingDraftClient | { id: string; name: string; email?: string; phone?: string } | null
+  resort_id?: string
+  resort?: ResortRef | ResortBibleItem | null
+  room_category_id?: string
+  room_category?: RoomCategoryRef | null
+  check_in: string
+  check_out: string
+  rate_plan_id?: string
+  rate_plan?: RatePlan | null
+  commission_model?: CommissionModel | null
+  total_amount?: number
+  currency: string
+  payment_schedule: PaymentMilestoneInput[]
+  itinerary: ItineraryDay[]
+  supplier_references: SupplierReferenceInput[]
+  attachments: AttachmentInput[]
+  internal_notes?: string
+}
+
+export interface ValidationError {
+  step: number
+  field?: string
+  message: string
+}

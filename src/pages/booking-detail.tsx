@@ -22,6 +22,7 @@ import {
   DeadlinesSlaCard,
   ResortRoomPanel,
   RelatedEntitiesRail,
+  ProposalHandoverGenerator,
 } from '@/components/booking-detail'
 import { cn } from '@/lib/utils'
 import type { TimelineStageType } from '@/types/booking'
@@ -282,6 +283,10 @@ export function BookingDetail() {
             />
             <DeadlinesSlaCard
               deadlines={detail?.deadlines ?? []}
+              isLoading={isLoading}
+            />
+            <ProposalHandoverGenerator
+              detail={detail ?? null}
               isLoading={isLoading}
             />
           </div>

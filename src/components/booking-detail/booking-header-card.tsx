@@ -5,7 +5,7 @@
  */
 import { Link } from 'react-router-dom'
 import { ConflictChecker } from '@/lib/booking-utils'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -159,6 +159,12 @@ export function BookingHeaderCard({
               </div>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link to={`/dashboard/bookings/${detail.id}/edit`}>
+                  <Pencil className="h-4 w-4" aria-hidden />
+                  Edit
+                </Link>
+              </Button>
               {onSendProposal && (
                 <Button variant="outline" size="sm" onClick={onSendProposal}>
                   Send Proposal

@@ -48,6 +48,7 @@ export const router = createBrowserRouter([
       { path: 'clients/:id', element: <ClientDetail /> },
       { path: 'bookings', element: <BookingsList /> },
       { path: 'bookings/new', element: <BookingWizard /> },
+      { path: 'bookings/:id/edit', element: <BookingWizard /> },
       { path: 'bookings/:id', element: <BookingDetail /> },
       { path: 'calendar', element: <Calendar /> },
       { path: 'tasks', element: <Tasks /> },
