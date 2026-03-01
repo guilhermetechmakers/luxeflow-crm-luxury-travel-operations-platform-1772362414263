@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
+import { ProtectedRoute } from '@/components/auth'
 import { Landing } from '@/pages/landing'
 import { Login } from '@/pages/login'
 import { Signup } from '@/pages/signup'
@@ -32,7 +33,11 @@ export const router = createBrowserRouter([
   { path: '/forgot-password', element: <ForgotPassword /> },
   {
     path: '/dashboard',
-    element: <DashboardLayout />,
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Dashboard /> },
       { path: 'clients', element: <ClientsList /> },

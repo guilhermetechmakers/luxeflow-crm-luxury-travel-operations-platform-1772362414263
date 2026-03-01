@@ -1,122 +1,149 @@
-import { useState } from 'react'
+/**
+ * Login Page - LuxeFlow CRM
+ * Secure authentication with email/password, SSO, and security notices
+ */
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Eye, EyeOff } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  LoginCard,
+  SSOPanel,
+  AuthLinks,
+  SecurityNotice,
+} from '@/components/auth'
+import type { LoginFormData } from '@/components/auth/login-card'
+import { useAuth } from '@/contexts/auth-context'
 import { toast } from 'sonner'
 
-const schema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z.string().min(1, 'Password is required'),
-  remember: z.boolean().optional(),
-})
-
-type FormData = z.infer<typeof schema>
-
 export function Login() {
-  const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { remember: false },
-  })
+  const { signIn, signInWithGoogle, signInWithEnterprise, isAuthenticated, isLoading } = useAuth()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const onSubmit = async (_data: FormData) => {
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isLoading, isAuthenticated, navigate])
+
+  const handleSubmit = async (data: LoginFormData) => {
+    setError(null)
+    setLoading(true)
     try {
-      // Placeholder - integrate with Supabase Auth
-      await new Promise((r) => setTimeout(r, 800))
+      await signIn(data.emailOrUsername, data.password)
       toast.success('Signed in successfully')
-      navigate('/dashboard')
-    } catch {
-      toast.error('Invalid credentials')
+      navigate('/dashboard', { replace: true })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Invalid credentials'
+      setError(message)
+      toast.error(message)
+    } finally {
+      setLoading(false)
     }
   }
 
+  const handleGoogleLogin = async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      await signInWithGoogle()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Google sign-in failed'
+      setError(message)
+      toast.error(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleEnterpriseSSO = async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      await signInWithEnterprise()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Enterprise SSO failed'
+      setError(message)
+      toast.error(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <LoginPageLayout>
+        <div className="flex min-h-[200px] items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        </div>
+      </LoginPageLayout>
+    )
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary/30 px-4">
-      <Card className="w-full max-w-md animate-fade-in">
+    <LoginPageLayout>
+      <Card className="w-full max-w-md animate-fade-in-up shadow-card">
         <CardHeader className="text-center">
           <CardTitle className="font-serif text-2xl">Welcome back</CardTitle>
           <CardDescription>Sign in to LuxeFlow CRM</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@agency.com"
-                className="mt-1"
-                {...register('email')}
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
-              )}
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative mt-1">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  {...register('password')}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" {...register('remember')} className="rounded" />
-                Remember me
-              </label>
-              <Link to="/forgot-password" className="text-sm text-accent hover:underline">
-                Forgot password?
-              </Link>
-            </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Signing in...' : 'Sign In'}
-            </Button>
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-            <Button type="button" variant="outline" className="w-full">
-              Google (SSO)
-            </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{' '}
-              <Link to="/signup" className="font-medium text-accent hover:underline">
-                Sign up
-              </Link>
-            </p>
-          </form>
+        <CardContent className="space-y-6">
+          <LoginCard
+            onSubmit={handleSubmit}
+            loading={loading}
+            error={error}
+            initialRemember={false}
+          />
+
+          <div className="flex items-center justify-between">
+            <AuthLinks />
+          </div>
+
+          <SSOPanel
+            onGoogleLogin={handleGoogleLogin}
+            onEnterpriseSSO={handleEnterpriseSSO}
+            loading={loading}
+          />
+
+          <SecurityNotice />
         </CardContent>
       </Card>
+    </LoginPageLayout>
+  )
+}
+
+function LoginPageLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-screen flex-col bg-[#F6F6F6]">
+      <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+          <Link
+            to="/"
+            className="font-serif text-xl font-semibold text-foreground transition-colors hover:text-accent"
+          >
+            LuxeFlow
+          </Link>
+          <nav className="flex items-center gap-4">
+            <Link
+              to="/"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Home
+            </Link>
+            <Link
+              to="/signup"
+              className="text-sm font-medium text-accent transition-colors hover:underline"
+            >
+              Sign Up
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
+        {children}
+      </main>
     </div>
   )
 }
