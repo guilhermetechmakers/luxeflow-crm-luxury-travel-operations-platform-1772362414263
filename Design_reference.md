@@ -326,67 +326,42 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-- Fidelity to luxury, minimalism, and clarity
-- Spacing, typography, and color guidelines as specified
-- Accessible components with keyboard navigation and screen reader labels
-- Subtle hover states, focus rings, and efficient micro-interactions
-- Clear visual hierarchy: task title first, then contextual details, then actions
-
----
-
-## Visual Style
-
-### Color Palette:
-- Primary: #FFFFFF
-- Accent: #8A9A5B
-- Neutrals: #F6F6F6, #EEEEEE
-- Text: #222222; secondary text #888888
-- Supporting: #C6AB62
-- Imagery: warm, sunlit photography
-
-### Typography & Layout:
-- Headings: Playfair Display / Georgia
-- Body: Lato / Helvetica Neue
-- Hierarchy: large headlines, subtle subheadings, legible body text
-- Spacing: generous padding and whitespace
-- Alignment: left content; center headers when appropriate
-- Treatments: uppercase section labels; italic quotes/testimonials
-
-### Key Design Elements
-- Card Design: white cards, soft shadows, 4-8px radius; dividers; hover lift
-- Navigation: sticky header, active states, responsive nav
-- Data Visualization: minimal, clean, unobtrusive
-- Interactive Elements: olive-green buttons, white inputs with light borders, accessible components
-
-### Design Philosophy
-- Luxury, calm, efficient UX
-- Clear, uncluttered layouts with generous spacing
-- Premium feel while enabling fast-paced operations
-
----
+- Maintain a refined, modern luxury aesthetic with minimalism and subtle opulence.
+- Ensure clean, airy layouts with generous spacing and clear visual hierarchy.
+- Use the specified color palette:
+  - Primary: #FFFFFF
+  - Accent: #8A9A5B
+  - Neutrals: #F6F6F6, #EEEEEE
+  - Text: #222222, secondary #888888
+  - Soft Gold: #C6AB62
+- Typography:
+  - Headings: Playfair Display or Georgia
+  - Body/UI: Lato or Helvetica Neue
+- Card Design:
+  - White cards with subtle shadows, 4–8px radius, divider lines, hover lift.
+- Navigation:
+  - Sticky header with smooth transitions; responsive collapsible menu.
+- Interactive Elements:
+  - Buttons in Olive Green (#8A9A5B) with white text; focus/hover states; accessible controls.
+- Data Visualization:
+  - No heavy charts required; keep charts minimalist if used in other modules.
+- Accessibility:
+  - ARIA labels, keyboard navigability, and contrast considerations.
 
 ## Mandatory Coding Standards — Runtime Safety
 
-CRITICAL: Implement all code with runtime safety in mind:
-- Use data ?? [] for results where applicable
-- Guard array operations: (items ?? []).map(...); Array.isArray(items) ? items.map(...) : []
-- Initialize arrays with correct defaults: useState<Type[]>([])
-- Validate API responses: const list = Array.isArray(response?.data) ? response.data : []
-- Use optional chaining for nested API data: obj?.property?.nested
-- Destructure with defaults: const { items = [], count = 0 } = response ?? {}
+CRITICAL: Follow these rules in ALL generated code to prevent runtime crashes.
+
+1. Supabase query results (if used): Always use nullish coalescing — const items = data ?? [].
+2. Array methods: Never call on a value that could be null/undefined. Guard with (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : [].
+3. React useState for arrays/objects: Initialize with correct type, e.g., useState<Resort[]>([]) and useState<string[]>([]) for IDs or tags.
+4. API response shapes: Validate — const list = Array.isArray(response?.data) ? response.data : [].
+5. Optional chaining: Use obj?.property?.nested when accessing nested API results.
+6. Destructuring with defaults: const { items = [], count = 0 } = response ?? {}.
 
 ---
 
-## Additional Notes for AI Development Tool
-
-- Generate modular, testable code with strong type definitions (TypeScript)
-- Provide unit tests for critical paths: task creation from template, automation rule evaluation, reminder dispatch
-- Include comprehensive API schema and example payloads in code comments
-- Include feature flags toggleable via config for experimental automation rules or notifications
-- Ensure the module respects multi-tenant data isolation and org-scoped data fetching
-- Document data mapping rules for how booking/client contexts map into task templates
-
-If you need a starter repository outline, a JSON-based API contract, or a mock data generator for tasks, I can provide those as well.
+This prompt provides a complete, actionable specification for AI development tooling to build the Resort Bible (Directory) feature with a strong emphasis on runtime safety, data integrity, and a premium user experience aligned to LuxeFlow’s design system. It covers frontend components, backend APIs, data models, integration points, UX flows, and acceptance criteria, ensuring a cohesive implementation that scales with the project’s broader CRM.
 
 ## Implementation Notes
 

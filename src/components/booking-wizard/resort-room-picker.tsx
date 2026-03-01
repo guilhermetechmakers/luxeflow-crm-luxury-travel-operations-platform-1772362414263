@@ -11,6 +11,7 @@ import { useDebounce } from '@/hooks/use-debounce'
 import { resortsApi } from '@/api/resorts'
 import { cn } from '@/lib/utils'
 import type { ResortBibleItem, RoomCategoryRef } from '@/types/booking'
+import type { Resort } from '@/types/resort'
 
 export interface ResortRoomPickerProps {
   value: {
@@ -43,8 +44,24 @@ export function ResortRoomPicker({ value, onChange, errors = [] }: ResortRoomPic
         query: q || undefined,
         transfer_time_max: typeof transferMax === 'number' ? transferMax : undefined,
       })
-      .then((list) => {
-        setResults(Array.isArray(list) ? list : [])
+      .then((list: Resort[]) => {
+        const mapped: ResortBibleItem[] = (list ?? []).map((r) => ({
+          id: r.id,
+          name: r.name,
+          location: r.location
+            ? `${r.location.city}, ${r.location.country}`
+            : undefined,
+          transfer_time: r.transferTime,
+          kids_policy: r.kidsPolicy,
+          room_types: (r.roomTypes ?? []).map((rt) => ({
+            id: rt.id,
+            name: rt.name,
+            bed_config: rt.bedConfig,
+            capacity: rt.maxOccupancy,
+          })),
+          tags: r.tags,
+        }))
+        setResults(mapped)
       })
       .finally(() => setIsSearching(false))
   }, [debouncedQuery, transferMax])

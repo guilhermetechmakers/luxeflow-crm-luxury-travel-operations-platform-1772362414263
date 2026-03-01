@@ -222,7 +222,16 @@ export const calendarApi = {
   async getResorts(): Promise<Resort[]> {
     try {
       const list = await resortsApi.searchResorts({})
-      return (list ?? []).map((r) => ({ id: r.id, name: r.name, location: r.location }))
+      return (list ?? []).map((r: { id: string; name: string; location?: { city?: string; country?: string; region?: string } }) => {
+        const loc = r.location
+        const locStr =
+          loc && typeof loc === 'object'
+            ? [loc.city, loc.region, loc.country].filter(Boolean).join(', ')
+            : typeof loc === 'string'
+              ? loc
+              : null
+        return { id: r.id, name: r.name, location: locStr ?? undefined }
+      })
     } catch {
       return MOCK_RESORTS
     }

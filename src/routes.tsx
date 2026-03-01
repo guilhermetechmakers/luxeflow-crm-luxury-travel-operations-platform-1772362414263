@@ -15,7 +15,7 @@ import { BookingDetail } from '@/pages/booking-detail'
 import { BookingWizard } from '@/pages/booking-wizard'
 import { Calendar } from '@/pages/calendar'
 import { Tasks } from '@/pages/tasks'
-import { ResortsList } from '@/pages/resorts-list'
+import { ResortBibleDirectory } from '@/pages/resort-bible-directory'
 import { ResortDetail } from '@/pages/resort-detail'
 import { Reports } from '@/pages/reports'
 import { Chat } from '@/pages/chat'
@@ -52,7 +52,7 @@ export const router = createBrowserRouter([
       { path: 'bookings/:id', element: <BookingDetail /> },
       { path: 'calendar', element: <Calendar /> },
       { path: 'tasks', element: <Tasks /> },
-      { path: 'resorts', element: <ResortsList /> },
+      { path: 'resorts', element: <ResortBibleDirectory /> },
       { path: 'resorts/:id', element: <ResortDetail /> },
       { path: 'reports', element: <Reports /> },
       { path: 'chat', element: <Chat /> },
