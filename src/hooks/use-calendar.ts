@@ -18,14 +18,33 @@ function getWeekRange(weekOffset: number): { start: string; end: string } {
   }
 }
 
+function getDayRange(weekOffset: number): { start: string; end: string } {
+  const now = new Date()
+  const d = new Date(now)
+  d.setDate(d.getDate() + weekOffset)
+  const s = d.toISOString().slice(0, 10)
+  return { start: s, end: s }
+}
+
 export function useCalendarEvents(
   weekOffset: number,
   filters: CalendarFilters,
-  _viewMode: 'week' | 'day' = 'week'
+  viewMode: 'week' | 'day' = 'week'
 ) {
-  const { start, end } = getWeekRange(weekOffset)
+  const dateRange =
+    viewMode === 'day' ? getDayRange(weekOffset) : getWeekRange(weekOffset)
+  const { start, end } = dateRange
   const query = useQuery({
-    queryKey: ['calendar', 'events', start, end, filters.agentIds, filters.resortIds, filters.status],
+    queryKey: [
+      'calendar',
+      'events',
+      start,
+      end,
+      filters.agentIds,
+      filters.resortIds,
+      filters.status,
+      filters.searchQuery,
+    ],
     queryFn: () =>
       calendarApi.getEvents({
         start,
@@ -33,6 +52,7 @@ export function useCalendarEvents(
         agentIds: (filters.agentIds ?? []).length > 0 ? filters.agentIds : undefined,
         resortIds: (filters.resortIds ?? []).length > 0 ? filters.resortIds : undefined,
         statuses: (filters.status ?? []).length > 0 ? filters.status : undefined,
+        searchQuery: filters.searchQuery?.trim() || undefined,
       }),
     staleTime: 60 * 1000,
   })
@@ -44,7 +64,7 @@ export function useCalendarEvents(
     ...query,
     events,
     count,
-    dateRange: { start, end },
+    dateRange,
   }
 }
 

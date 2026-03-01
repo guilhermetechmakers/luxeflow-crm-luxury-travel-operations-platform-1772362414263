@@ -145,6 +145,7 @@ export const calendarApi = {
     agentIds?: string[]
     resortIds?: string[]
     statuses?: string[]
+    searchQuery?: string
   }): Promise<CalendarEventsResponse> {
     try {
       const search = new URLSearchParams()
@@ -153,6 +154,7 @@ export const calendarApi = {
       if (params.agentIds?.length) search.set('agentIds', params.agentIds.join(','))
       if (params.resortIds?.length) search.set('resortIds', params.resortIds.join(','))
       if (params.statuses?.length) search.set('statuses', params.statuses.join(','))
+      if (params.searchQuery?.trim()) search.set('q', params.searchQuery.trim())
       const res = await api.get<CalendarEventsResponse>(`/calendar/events?${search.toString()}`)
       return normalizeEventsResponse(res)
     } catch {
@@ -165,6 +167,14 @@ export const calendarApi = {
       }
       if (params.statuses?.length) {
         events = events.filter((e) => params.statuses!.includes(e.status))
+      }
+      if (params.searchQuery?.trim()) {
+        const q = params.searchQuery.trim().toLowerCase()
+        events = events.filter(
+          (e) =>
+            e.title?.toLowerCase().includes(q) ||
+            e.booking?.reference?.toLowerCase().includes(q)
+        )
       }
       return { events, count: events.length }
     }
@@ -290,10 +300,22 @@ export const calendarApi = {
   },
 
   /**
-   * GET /api/ical/export?bookingId=
+   * GET /api/ical/export?start=&end=&bookingIds=
+   * Exports current view (start/end) or selected bookings
    */
-  getIcalExportUrl(bookingId: string): string {
+  getIcalExportUrl(params: {
+    start?: string
+    end?: string
+    bookingIds?: string[]
+  }): string {
     const base = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api'
-    return `${base}/ical/export?bookingId=${encodeURIComponent(bookingId)}`
+    const search = new URLSearchParams()
+    if (params.start) search.set('start', params.start)
+    if (params.end) search.set('end', params.end)
+    if (params.bookingIds?.length) {
+      params.bookingIds.forEach((id) => search.append('bookingIds', id))
+    }
+    const qs = search.toString()
+    return `${base}/ical/export${qs ? `?${qs}` : ''}`
   },
 }

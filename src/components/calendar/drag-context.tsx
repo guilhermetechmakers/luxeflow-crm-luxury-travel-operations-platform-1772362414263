@@ -70,9 +70,29 @@ export function DragContextProvider({
       if (newStart >= newEnd) {
         return { valid: false, message: 'Invalid time range' }
       }
+      const otherEvents = (events ?? []).filter((e) => e.id !== event.id)
+      const conflicts = otherEvents.filter((e) => {
+        const aStart = new Date(e.start_at)
+        const aEnd = new Date(e.end_at)
+        const sameResource =
+          (event.booking_id && e.booking_id === event.booking_id) ||
+          (event.room_id && e.room_id === event.room_id) ||
+          (event.agent_id && e.agent_id === event.agent_id)
+        if (!sameResource) return false
+        const evDate = new Date(e.start_at)
+        const evDayKey = `${evDate.getFullYear()}-${String(evDate.getMonth() + 1).padStart(2, '0')}-${String(evDate.getDate()).padStart(2, '0')}`
+        if (evDayKey !== slot.date) return false
+        return newStart.getTime() < aEnd.getTime() && newEnd.getTime() > aStart.getTime()
+      })
+      if (conflicts.length > 0) {
+        return {
+          valid: false,
+          message: `Conflicts with ${conflicts[0]?.title ?? 'another event'}. Please choose a different time.`,
+        }
+      }
       return { valid: true }
     },
-    [dragSettings]
+    [dragSettings, events]
   )
 
   const onDragStart = useCallback((event: CalendarEvent, _e?: React.DragEvent) => {

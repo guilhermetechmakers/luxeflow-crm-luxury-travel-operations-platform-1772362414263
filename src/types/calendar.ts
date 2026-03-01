@@ -64,6 +64,7 @@ export interface CalendarFilters {
   agentIds: string[]
   resortIds: string[]
   status: string[]
+  searchQuery?: string
 }
 
 export type ViewMode = 'week' | 'day'

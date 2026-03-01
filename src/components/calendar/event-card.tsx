@@ -1,5 +1,6 @@
 /**
  * EventCard - Type-based event blocks with drag handle when allowed
+ * LuxeFlow palette: olive accent (#8A9A5B), gold (#C6AB62), warm neutrals
  * Variants: CheckIn, CheckOut, Deadline, Task, RoomBlock
  */
 import { useCallback } from 'react'
@@ -12,28 +13,28 @@ const EVENT_STYLES: Record<
   { bg: string; border: string; icon: typeof LogIn }
 > = {
   checkin: {
-    bg: 'bg-primary/10',
-    border: 'border-l-4 border-l-primary',
+    bg: 'bg-[rgb(var(--accent))]/10',
+    border: 'border-l-4 border-l-accent',
     icon: LogIn,
   },
   checkout: {
-    bg: 'bg-amber-50',
+    bg: 'bg-amber-50 dark:bg-amber-950/30',
     border: 'border-l-4 border-l-amber-500',
     icon: LogOut,
   },
   deadline: {
-    bg: 'bg-amber-100',
-    border: 'border-l-4 border-l-amber-500',
+    bg: 'bg-[rgb(var(--supporting))]/15',
+    border: 'border-l-4 border-l-[rgb(var(--supporting))]',
     icon: Clock,
   },
   task: {
-    bg: 'bg-slate-100',
-    border: 'border-l-4 border-l-slate-500',
+    bg: 'bg-secondary/80',
+    border: 'border-l-4 border-l-accent',
     icon: CheckSquare,
   },
   room_block: {
-    bg: 'bg-violet-100',
-    border: 'border-l-4 border-l-violet-500',
+    bg: 'bg-accent/5',
+    border: 'border-l-4 border-l-accent',
     icon: Bed,
   },
 }
@@ -91,6 +92,7 @@ export function EventCard({
       className={cn(
         'group relative flex items-start gap-2 rounded-lg px-2 py-1.5 text-left transition-all duration-200',
         'hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+        'hover:scale-[1.01] active:scale-[0.99]',
         style.bg,
         style.border,
         isDragging && 'opacity-50 scale-95',

@@ -5,7 +5,8 @@ import { useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TimeScaleColumn } from './time-scale-column'
 import { ResourceLane } from './resource-lane'
@@ -56,10 +57,11 @@ export interface CalendarWeekViewProps {
     eventId: string,
     updates: { start_at: string; end_at: string }
   ) => Promise<void>
-  syncConfig?: { id: string; enabled: boolean; provider: string; sync_type: string } | null
+  syncConfig?: { id: string; enabled: boolean; provider: string; sync_type: string; user_id?: string } | null
   onSetupSync?: (config: { provider: 'google' | 'ical'; sync_type: 'one-way' | 'two-way' }) => void
-  onExportIcal?: () => void
+  onExportIcal?: (bookingIds?: string[]) => void
   onMarkComplete?: (event: CalendarEvent) => void
+  isLoading?: boolean
   className?: string
 }
 
@@ -80,6 +82,7 @@ function CalendarWeekViewInner({
   onSetupSync,
   onExportIcal,
   onMarkComplete,
+  isLoading = false,
   className,
 }: CalendarWeekViewProps) {
   const navigate = useNavigate()
@@ -92,6 +95,11 @@ function CalendarWeekViewInner({
     () => getDayKeys(dateRange.start, dateRange.end),
     [dateRange.start, dateRange.end]
   )
+
+  const navLabel =
+    viewMode === 'day'
+      ? formatDayHeader(dayKeys[0] ?? dateRange.start)
+      : `${dateRange.start} – ${dateRange.end}`
 
   const handleEventClick = useCallback((event: CalendarEvent) => {
     setPopoverEvent(event)
@@ -150,7 +158,7 @@ function CalendarWeekViewInner({
               variant="outline"
               size="icon"
               onClick={() => onWeekChange(-1)}
-              aria-label="Previous week"
+              aria-label={viewMode === 'day' ? 'Previous day' : 'Previous week'}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -158,15 +166,25 @@ function CalendarWeekViewInner({
               variant="outline"
               size="icon"
               onClick={() => onWeekChange(1)}
-              aria-label="Next week"
+              aria-label={viewMode === 'day' ? 'Next day' : 'Next week'}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
           <QuickActionsBar
-            syncConfig={syncConfig as any}
+            syncConfig={
+              syncConfig
+                ? {
+                    id: syncConfig.id,
+                    user_id: syncConfig.user_id ?? 'current',
+                    provider: syncConfig.provider as 'google' | 'ical',
+                    sync_type: syncConfig.sync_type as 'one-way' | 'two-way',
+                    enabled: syncConfig.enabled,
+                  }
+                : null
+            }
             onSetupSync={onSetupSync}
-            onExportIcal={onExportIcal}
+            onExportIcal={() => onExportIcal?.()}
           />
         </div>
       </div>
@@ -181,25 +199,65 @@ function CalendarWeekViewInner({
       <Card>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">
-              {dateRange.start} – {dateRange.end}
-            </span>
+            <span className="text-sm text-muted-foreground">{navLabel}</span>
           </div>
         </CardHeader>
         <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-6 space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <div className="grid grid-cols-7 gap-2">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <Skeleton key={i} className="h-32" />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 flex-1" />
+                ))}
+              </div>
+            </div>
+          ) : (events ?? []).length === 0 ? (
+            <div
+              className="flex flex-col items-center justify-center py-16 px-6 text-center"
+              role="status"
+              aria-label="No events"
+            >
+              <CalendarDays className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <h3 className="font-serif text-lg font-semibold text-foreground mb-1">
+                No events this period
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                Try adjusting your filters or selecting a different date range. Check-ins, check-outs, deadlines, tasks, and room blocks will appear here.
+              </p>
+            </div>
+          ) : (
           <div
             className="overflow-x-auto overflow-y-auto"
             onDragEnd={onDragEnd}
             style={{ maxHeight: '70vh' }}
           >
-            <div className="min-w-[800px] flex">
+            <div
+              className={cn(
+                'flex min-w-[800px]',
+                viewMode === 'day' && 'min-w-[400px]'
+              )}
+            >
               <TimeScaleColumn className="shrink-0 w-14" />
               <div className="flex-1 min-w-0">
-                <div className="grid grid-cols-7 border-b border-border">
+                <div
+                  className={cn(
+                    'grid border-b border-border',
+                    viewMode === 'day' ? 'grid-cols-1' : 'grid-cols-7'
+                  )}
+                >
                   {(dayKeys ?? []).map((key) => (
                     <div
                       key={key}
-                      className="min-w-[120px] flex-1 p-2 text-center text-sm font-medium border-r border-border last:border-r-0"
+                      className={cn(
+                        'min-w-[120px] flex-1 p-2 text-center text-sm font-medium border-r border-border',
+                        viewMode === 'day' ? 'border-r-0' : 'last:border-r-0'
+                      )}
                     >
                       {formatDayHeader(key)}
                     </div>
@@ -227,6 +285,7 @@ function CalendarWeekViewInner({
               </div>
             </div>
           </div>
+          )}
         </CardContent>
       </Card>
 

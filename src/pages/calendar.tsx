@@ -28,7 +28,11 @@ export function Calendar() {
     status: [],
   })
 
-  const { events, dateRange } = useCalendarEvents(weekOffset, filters, viewMode)
+  const { events, dateRange, isLoading } = useCalendarEvents(
+    weekOffset,
+    filters,
+    viewMode
+  )
   const { agents } = useCalendarAgents()
   const { resorts } = useCalendarResorts()
   const { syncConfig } = useCalendarSyncStatus()
@@ -56,15 +60,22 @@ export function Calendar() {
     []
   )
 
-  const handleExportIcal = useCallback(() => {
-    const url = calendarApi.getIcalExportUrl('')
-    if (url) {
-      window.open(url, '_blank')
-      toast.success('iCal export started')
-    } else {
-      toast.error('Export not available')
-    }
-  }, [])
+  const handleExportIcal = useCallback(
+    (bookingIds?: string[]) => {
+      const url = calendarApi.getIcalExportUrl({
+        start: dateRange.start,
+        end: dateRange.end,
+        bookingIds,
+      })
+      if (url) {
+        window.open(url, '_blank')
+        toast.success('iCal export started')
+      } else {
+        toast.error('Export not available')
+      }
+    },
+    [dateRange.start, dateRange.end]
+  )
 
   const handleMarkComplete = useCallback(
     async (event: { id: string }) => {
@@ -100,6 +111,7 @@ export function Calendar() {
         onSetupSync={handleSetupSync}
         onExportIcal={handleExportIcal}
         onMarkComplete={handleMarkComplete}
+        isLoading={isLoading}
       />
     </div>
   )
