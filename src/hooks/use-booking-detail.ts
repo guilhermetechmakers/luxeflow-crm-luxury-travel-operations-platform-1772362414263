@@ -4,7 +4,6 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { bookingsApi } from '@/api/bookings'
-import type { BookingDetail } from '@/types/booking'
 
 const QUERY_KEY = ['booking-detail'] as const
 
@@ -23,13 +22,13 @@ export function useBookingDetail(bookingId: string) {
   })
 
   const detail = query.data ?? null
-  const timeline = (detail?.timeline ?? []) as BookingDetail['timeline']
-  const itinerary = (detail?.itinerary ?? []) as BookingDetail['itinerary']
-  const payments = (detail?.payments ?? []) as BookingDetail['payments']
-  const attachments = (detail?.attachments ?? []) as BookingDetail['attachments']
-  const notes = (detail?.notes ?? []) as BookingDetail['notes']
-  const approvals = (detail?.approvals ?? []) as BookingDetail['approvals']
-  const supplierRefs = (detail?.supplier_references ?? []) as BookingDetail['supplier_references']
+  const timeline = detail?.timeline ?? []
+  const itinerary = detail?.itinerary ?? []
+  const payments = detail?.payments ?? []
+  const attachments = detail?.attachments ?? []
+  const notes = detail?.notes ?? []
+  const approvals = detail?.approvals ?? []
+  const supplierRefs = detail?.supplier_references ?? []
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: buildQueryKey(bookingId) })
 
@@ -56,7 +55,7 @@ export function useBookingDetail(bookingId: string) {
   })
 
   const requestApprovalMutation = useMutation({
-    mutationFn: (payload?: { approver_id?: string }) => bookingsApi.requestApproval(bookingId, payload),
+    mutationFn: (payload?: { approver_id?: string }) => bookingsApi.requestApproval(bookingId, payload ?? {}),
     onSuccess: () => invalidate(),
   })
 

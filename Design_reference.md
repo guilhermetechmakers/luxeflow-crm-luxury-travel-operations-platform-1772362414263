@@ -326,71 +326,70 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-- Follow the LuxeFlow color palette, typography, spacing, and card/section styling.
-- Maintain consistent card shadows, borders, and dividers; use soft hover states.
-- Navigation should include a sticky header and responsive behavior; maintain premium feel on mobile.
-- Data visualization should remain minimal; focus on clarity and unobtrusive data presentation.
-- Interactive elements should be accessible, with clear focus styles and responsive feedback.
+- Consistent with the LuxeFlow visual language: crisp white surfaces, olive-green accents, warm neutrals, deep charcoal text, soft gold accents.
+- Cards with subtle shadows and rounded corners; dividers and clear section separation.
+- Top navigation and sticky header behavior as described; responsive behavior for mobile/tablet.
+- Data visualization is minimal; no heavy charts; emphasis on clarity and legibility.
+- Interactive elements: accessible focus states, smooth transitions, and restrained micro-interactions.
 
 ---
 
 ## Visual Style
 
-### Color Palette:
-- Primary: Crisp white (#FFFFFF)
-- Accent: Rich olive green (#8A9A5B)
-- Neutrals: Warm light gray (#F6F6F6, #EEEEEE)
-- Text: Deep charcoal (#222222); secondary text #888888
-- Supporting: Soft gold (#C6AB62)
-- Imagery: Warm, sunlit photography
+### Color Palette
+- Primary: #FFFFFF
+- Accent: #8A9A5B
+- Neutrals: #F6F6F6, #EEEEEE
+- Text: #222222, #888888
+- Supporting: #C6AB62
 
-### Typography & Layout:
-- Font Family: Headings with Playfair Display or Georgia; body with Lato or Helvetica Neue
-- Hierarchy: Large headlines, clear subsections, legible body
-- Spacing: Generous padding; ample whitespace; distinct blocks
-- Alignment: Left-aligned content; headers/callouts center-aligned when appropriate
-- Special Treatments: Uppercase section labels; italics for quotes/testimonials
+### Typography & Layout
+- Headings: Playfair Display or Georgia
+- Body: Lato or Helvetica Neue
+- Hierarchy: Large headlines, clear subheadings, readable body text
+- Spacing: Generous; large whitespace between sections
+- Alignment: Left-aligned content; headers/callouts center-aligned when needed
+- Special Treatments: Uppercase section labels; italics for quotes/tests where appropriate
 
 ### Key Design Elements
-- Card Design: White cards with subtle shadow, 4-8px radius; dividers; hover lift
-- Navigation: Top nav with logo, responsive menu; sticky header; active states with underlines
-- Data Visualization: Minimal charts if needed; keep clean and monochrome
-- Interactive Elements: Olive green action buttons; white inputs with light borders; smooth transitions
+- Card Design: White cards, subtle shadows, 4-8px radii
+- Dividers: Thin light gray lines
+- Hover States: Subtle shadow and border highlights
+- Visual Hierarchy: Image/heading at top; clear secondary sections
 
-### Design Philosophy
-- Modern luxury, minimalism with subtle opulence
-- Clear, legible, calm, premium UX
-- Generous whitespace and balanced visual rhythm
-- Efficient navigation and fast operation for agents
+### Navigation
+- Top navigation: Logo and horizontal menu
+- Sticky Header: Visible while scrolling
+- Active States: Accent underline/highlight
+- Responsive: Collapsible mobile nav
 
----
+### Data Visualization
+- Minimalist, clean, monochrome with accent emphasis
 
-## Mandatory Coding Standards — Runtime Safety
-
-CRITICAL: Follow these rules in ALL generated code to prevent runtime crashes.
-
-1. Supabase query results: Always use nullish coalescing — const items = data ?? []. Supabase returns null when no rows.
-2. Array methods: Never call on a value that could be null/undefined/non-array. Guard:
-   - (items ?? []).map(...)
-   - Array.isArray(items) ? items.map(...) : []
-3. React useState for arrays/objects: Initialize with correct type, e.g., useState<Client[]>([]), never use useState() or useState(null) for arrays.
-4. API response shapes: Always validate — const list = Array.isArray(response?.data) ? response.data : [].
-5. Optional chaining: Use obj?.property?.nested when accessing nested data from API responses.
-6. Destructuring with defaults: const { items = [], count = 0 } = response ?? {}.
+### Interactive Elements
+- Buttons: Olive-green, white text, rounded, with hover shadow
+- Forms: White fields, light gray borders, clear focus
+- Dropdowns: Simple and unobtrusive
+- Micro-interactions: Smooth transitions
 
 ---
 
- PROJECT CONTEXT: LuxeFlow CRM — Luxury Travel Operations Platform
-Target Page: Client Detail
-Description: Build a comprehensive Client Detail page with all client-centric data, strong permissions, and integrated workflows. The MVP should emphasize core pages/modules, robust permissions, and high-leverage integrations, with the Client Detail page serving as the hub for client-centric operations.
+## Mandatory Coding Standards — Runtime Safety (Recap)
+- Always use nullish coalescing for Supabase results: data ?? []
+- Guard all array methods with (items ?? []).map(...) or Array.isArray(items) ? items.map(...) : []
+- Initialize arrays/objects with proper useState defaults: useState<Type[]>([])
+- Validate API shapes: const list = Array.isArray(response?.data) ? response.data : []
+- Use optional chaining for nested API data: obj?.prop?.nested
+- Destructure with defaults: const { items = [], count = 0 } = response ?? {}
 
-Connected Pages:
-- Clients List: Master list with search, filters (VIP, family, last active), bulk actions, and quick-select to open Client Detail or create a booking.
+---
 
-Connected Features:
-- Client Profile Management: Full CRUD for client records, document uploads (passports/visas), preferences, billing details, travel history, and notes with access controls.
-
-Generate the complete, detailed prompt now:
+Notes for AI development tool:
+- Produce a single, cohesive prompt that can be fed into an AI code assistant to generate the Booking Detail module, including TypeScript types, React components, API contracts, and test stubs.
+- Include explicit guidance for null safety patterns, state initialization, and defensive programming as outlined.
+- Ensure the prompt covers all connected features (Operations Command Center, Booking Lifecycle, Booking Create/Edit Wizard, and Bookings List) as integration touchpoints.
+- Provide example data shapes and sample responses to illustrate the expected API payloads.
+- Emphasize performance, accessibility, and design system conformance throughout the generated code.
 
 ## Implementation Notes
 
